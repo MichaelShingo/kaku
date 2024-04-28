@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@p5-wrapper/next": "^1.0.3",
+    "@p5-wrapper/react": "^4.4.0",
     "@reduxjs/toolkit": "^2.2.0",
     "@types/nodemailer": "^6.4.14",
     "@typescript-eslint/eslint-plugin": "^6.15.0",

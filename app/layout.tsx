@@ -1,25 +1,24 @@
 import type { Metadata } from 'next';
-import { Oswald } from 'next/font/google';
+import { Silkscreen } from 'next/font/google';
 import './globals.css';
 import { ReduxProvider } from '@/redux/provider';
 import { Analytics } from '@vercel/analytics/react';
 
-const oswald = Oswald({
+const silkscreen = Silkscreen({
+	weight: '400',
 	subsets: ['latin'],
-	display: 'swap',
 });
 
 export const metadata: Metadata = {
 	title: 'Kaku | Draw Music',
-	description:
-		'Michael Shingo Crawford, web developer and musician based in the Netherlands. Build with Next.js, React, Typescript.',
+	description: 'Draw music and play it back',
 	metadataBase: new URL('https://portfolio.michaelshingo.com/'),
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
-		<html lang="en" className="overflow-x-hidden bg-paper-white">
-			<body className={`${oswald.className}`}>
+		<html lang="en" className="">
+			<body className={`${silkscreen.className}`}>
 				<ReduxProvider>{children}</ReduxProvider>
 				<Analytics />
 			</body>

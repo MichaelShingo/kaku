@@ -1,13 +1,9 @@
-import Brush from './components/Brush';
-import dynamic from 'next/dynamic';
-
-const DynamicCanvas = dynamic(() => import('./components/Canvas'), { ssr: false });
+import Canvas from './components/Canvas';
 
 export default function Home() {
 	return (
 		<div>
-			<Brush />
-			<DynamicCanvas />
+			<Canvas />
 		</div>
 	);
 }

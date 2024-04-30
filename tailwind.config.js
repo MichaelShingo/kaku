@@ -5,7 +5,10 @@ module.exports = {
 	theme: {
 		extend: {
 			colors: {
-				'paper-white': '#fffdf5',
+				'off-white': '#fffffc',
+				'off-black': '#2c363f',
+				'light-blue': '#01baef',
+				'light-pink': '#d972ff',
 			},
 			backgroundImage: {
 				imageIcon: 'url("/imageIcon.svg")',

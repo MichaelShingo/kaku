@@ -4,6 +4,10 @@ export type MousePosition = {
 	x: number;
 	y: number;
 };
+export type CanvasSize = {
+	x: number;
+	y: number;
+};
 type InitialState = {
 	value: WindowState;
 };
@@ -13,6 +17,7 @@ type WindowState = {
 	windowWidth: number;
 	mousePosition: MousePosition;
 	isDragging: boolean;
+	canvasSize: CanvasSize;
 };
 
 const initialState = {
@@ -21,6 +26,7 @@ const initialState = {
 		windowWidth: 0,
 		mousePosition: { x: 0, y: 0 },
 		isDragging: false,
+		canvasSize: { x: 0, y: 0 },
 	} as WindowState,
 } as InitialState;
 
@@ -40,8 +46,12 @@ export const window = createSlice({
 		setIsDragging: (state, action: PayloadAction<boolean>) => {
 			state.value.isDragging = action.payload;
 		},
+		setCanvasSize: (state, action: PayloadAction<CanvasSize>) => {
+			state.value.canvasSize = action.payload;
+		},
 	},
 });
 
-export const { setHeight, setWidth, setMousePosition, setIsDragging } = window.actions;
+export const { setHeight, setWidth, setMousePosition, setIsDragging, setCanvasSize } =
+	window.actions;
 export default window.reducer;

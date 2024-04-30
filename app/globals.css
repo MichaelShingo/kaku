@@ -2,6 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
+::-moz-selection {
+	/* Code for Firefox */
+	color: #2c363f;
+	background: #d972ff;
+}
+
+::selection {
+	color: #2c363f;
+	background: #d972ff;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+/* Firefox */
+input[type='number'] {
+	-moz-appearance: textfield;
+}
+
 input,
 textarea {
 	margin: 0;

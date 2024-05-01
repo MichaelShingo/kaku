@@ -15,17 +15,23 @@ type ToolState = {
 const initialState = {
 	value: {
 		brushSize: 1,
-		color: '#ffffff',
+		color: '#000000',
 		selectedTool: 'move',
 	} as ToolState,
 } as InitialState;
 
-export const window = createSlice({
-	name: 'window',
+export const tool = createSlice({
+	name: 'tool',
 	initialState: initialState,
 	reducers: {
 		setBrushSize: (state, action: PayloadAction<number>) => {
 			state.value.brushSize = action.payload;
+		},
+		incrementBrushSize: (state) => {
+			state.value.brushSize++;
+		},
+		decrementBrushSize: (state) => {
+			state.value.brushSize--;
 		},
 		setColor: (state, action: PayloadAction<string>) => {
 			state.value.color = action.payload;
@@ -36,5 +42,11 @@ export const window = createSlice({
 	},
 });
 
-export const { setBrushSize, setColor, setSelectedTool } = window.actions;
-export default window.reducer;
+export const {
+	setBrushSize,
+	setColor,
+	setSelectedTool,
+	incrementBrushSize,
+	decrementBrushSize,
+} = tool.actions;
+export default tool.reducer;

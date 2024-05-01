@@ -1,6 +1,7 @@
 'use client';
 import { CanvasSize, setCanvasSize } from '@/redux/features/windowSlice';
 import { useAppSelector } from '@/redux/store';
+import Link from 'next/link';
 import { useDispatch } from 'react-redux';
 
 const Welcome = () => {
@@ -8,6 +9,8 @@ const Welcome = () => {
 	const canvasSize: CanvasSize = useAppSelector(
 		(state) => state.windowReducer.value.canvasSize
 	);
+
+	const handleClick = () => {};
 
 	return (
 		<div className="flex h-[100vh] w-[100%] items-center justify-center bg-off-white text-off-white">
@@ -34,9 +37,14 @@ const Welcome = () => {
 						dispatch(setCanvasSize({ ...canvasSize, y: parseInt(e.target.value) }))
 					}
 				/>
-				<button className="fit-content mt-16 bg-off-white p-3 text-4xl text-light-pink hover:bg-light-pink hover:text-off-black">
-					Create
-				</button>
+				<Link href="/draw">
+					<button
+						className="fit-content mt-16 bg-off-white p-3 text-4xl text-light-pink hover:bg-light-pink hover:text-off-black"
+						onClick={handleClick}
+					>
+						Create
+					</button>
+				</Link>
 			</div>
 		</div>
 	);

@@ -35,3 +35,16 @@ textarea {
 	color: inherit;
 	line-height: inherit;
 }
+
+input[type='color'] {
+	border: none;
+	background: transparent; /* Reset background */
+	margin: 0; /* Reset margin */
+	border-radius: 0;
+	padding: 0;
+	box-shadow: none;
+	outline: none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+}

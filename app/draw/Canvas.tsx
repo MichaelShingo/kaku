@@ -1,12 +1,20 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
+import { useAppSelector } from '@/redux/store';
+import { useDispatch } from 'react-redux';
 
 function App() {
+	const dispatch = useDispatch();
+	const [color, brushSize, selectedTool] = useAppSelector((state) => {
+		return [
+			state.toolReducer.value.color,
+			state.toolReducer.value.brushSize,
+			state.toolReducer.value.selectedTool,
+		];
+	});
 	const [mouseData, setMouseData] = useState({ x: 0, y: 0 });
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const [canvasCTX, setCanvasCTX] = useState<CanvasRenderingContext2D | null>(null);
-	const [color, setColor] = useState('#000000');
-	const [size, setSize] = useState(10);
 
 	useEffect(() => {
 		const canvas = canvasRef.current;
@@ -37,8 +45,7 @@ function App() {
 			});
 			ctx.lineTo(e.clientX, e.clientY);
 			ctx.strokeStyle = color;
-			ctx.lineWidth = size;
-			// Set the line cap to round
+			ctx.lineWidth = brushSize;
 			ctx.lineCap = 'round';
 			ctx.stroke();
 		}
@@ -47,16 +54,17 @@ function App() {
 	return (
 		<div>
 			<canvas
+				className="border-3 border-off-black"
 				ref={canvasRef}
 				onMouseEnter={(e) => SetPos(e)}
-				onMouseMove={(e: React.MouseEvent) => {
+				onMouseMove={(e) => {
 					SetPos(e);
 					Draw(e);
 				}}
 				onMouseDown={(e) => SetPos(e)}
 			></canvas>
 
-			<div
+			{/* <div
 				className="controlpanel"
 				style={{
 					position: 'absolute',
@@ -90,7 +98,7 @@ function App() {
 				>
 					Clear
 				</button>
-			</div>
+			</div> */}
 		</div>
 	);
 }

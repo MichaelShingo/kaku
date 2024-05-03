@@ -16,6 +16,7 @@ import {
 	IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
 import { setColor, setSelectedTool, Tool } from '@/redux/features/toolSlice';
+import { incrementCanvasZoom } from '@/redux/features/windowSlice';
 
 const Toolbar = () => {
 	const dispatch = useDispatch();
@@ -91,7 +92,9 @@ const ToolButton: React.FC<ToolButtonProps> = ({ toolName, icon }) => {
 		<button
 			className="h-12 w-16 hover:cursor-pointer"
 			style={{ backgroundColor: isActive ? 'black' : 'transparent' }}
-			onClick={() => dispatch(setSelectedTool(toolName))}
+			onClick={() => {
+				dispatch(setSelectedTool(toolName));
+			}}
 		>
 			<FontAwesomeIcon icon={icon} color={isActive ? '#01baef' : '#fffffc'} />
 		</button>

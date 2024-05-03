@@ -6,7 +6,7 @@ import Brush from './Brush';
 
 export default function Home() {
 	return (
-		<div>
+		<div className="h-[100vh]">
 			<Brush />
 			<Toolbar />
 			<Playbar />

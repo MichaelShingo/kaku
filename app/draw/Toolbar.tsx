@@ -45,6 +45,34 @@ const Toolbar = () => {
 					}}
 				/>
 			</div>
+			{/* <div
+				className="controlpanel"
+				style={{
+					position: 'absolute',
+					top: '0',
+					left: '0',
+					width: '100%',
+				}}
+			>
+				<input
+					type="range"
+					value={size}
+					max={40}
+					onChange={(e) => {
+						setSize(parseInt(e.target.value));
+					}}
+				/>
+				<button
+					onClick={() => {
+						const ctx = canvasCTX;
+						if (canvasRef.current) {
+							ctx?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+						}
+					}}
+				>
+					Clear
+				</button>
+			</div> */}
 		</div>
 	);
 };

@@ -5,12 +5,8 @@ import { useDispatch } from 'react-redux';
 
 function App() {
 	const dispatch = useDispatch();
-	const [color, brushSize, selectedTool] = useAppSelector((state) => {
-		return [
-			state.toolReducer.value.color,
-			state.toolReducer.value.brushSize,
-			state.toolReducer.value.selectedTool,
-		];
+	const [color, brushSize] = useAppSelector((state) => {
+		return [state.toolReducer.value.color, state.toolReducer.value.brushSize];
 	});
 	const [mouseData, setMouseData] = useState({ x: 0, y: 0 });
 	const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -79,13 +75,6 @@ function App() {
 					max={40}
 					onChange={(e) => {
 						setSize(parseInt(e.target.value));
-					}}
-				/>
-				<input
-					type="color"
-					value={color}
-					onChange={(e) => {
-						setColor(e.target.value);
 					}}
 				/>
 				<button

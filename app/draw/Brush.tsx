@@ -9,6 +9,9 @@ const Brush = () => {
 	const mousePosition: MousePosition = useAppSelector(
 		(state) => state.windowReducer.value.mousePosition
 	);
+	const brushSize: number = useAppSelector((state) => state.toolReducer.value.brushSize);
+
+	const brushSizePx = `${brushSize}px`;
 
 	useEffect(() => {
 		const handleMouseMove = (e: MouseEvent) => {
@@ -23,8 +26,14 @@ const Brush = () => {
 	}, []);
 	return (
 		<div
-			className="absolute h-12 w-12 rounded-full border-2 border-black"
-			style={{ top: `${mousePosition.y}px`, left: `${mousePosition.x}px` }}
+			className="pointer-events-none absolute rounded-full border-2 border-black"
+			style={{
+				top: `${mousePosition.y}px`,
+				left: `${mousePosition.x}px`,
+				width: brushSizePx,
+				height: brushSizePx,
+				transform: `translateX(-50%) translateY(-50%)`,
+			}}
 		></div>
 	);
 };

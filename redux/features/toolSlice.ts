@@ -4,7 +4,7 @@ type InitialState = {
 	value: ToolState;
 };
 
-export type Tool = 'brush' | 'gradient' | 'shape' | 'color picker' | 'eraser' | 'move';
+export type Tool = 'brush' | 'shape' | 'eraser' | 'hand' | 'zoomIn' | 'zoomOut';
 
 type ToolState = {
 	brushSize: number;
@@ -14,9 +14,9 @@ type ToolState = {
 
 const initialState = {
 	value: {
-		brushSize: 1,
+		brushSize: 10,
 		color: '#000000',
-		selectedTool: 'move',
+		selectedTool: 'brush',
 	} as ToolState,
 } as InitialState;
 

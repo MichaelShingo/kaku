@@ -1,5 +1,5 @@
 'use client';
-import { setIsMouseDown } from '@/redux/features/windowSlice';
+import { setIsMouseDown, setMousePosition } from '@/redux/features/windowSlice';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -14,6 +14,11 @@ const MouseEvents = () => {
 		const handleMouseUp = (): void => {
 			dispatch(setIsMouseDown(false));
 		};
+		const handleMouseMove = (e: MouseEvent) => {
+			dispatch(setMousePosition({ x: e.clientX, y: e.clientY }));
+		};
+
+		window.addEventListener('mousemove', handleMouseMove);
 
 		window.addEventListener('mousedown', handleMouseDown);
 		window.addEventListener('mouseup', handleMouseUp);
@@ -21,6 +26,7 @@ const MouseEvents = () => {
 		return () => {
 			window.removeEventListener('mousedown', handleMouseDown);
 			window.removeEventListener('mouseup', handleMouseUp);
+			window.removeEventListener('mousemove', handleMouseMove);
 		};
 	}, []);
 

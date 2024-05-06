@@ -12,6 +12,7 @@ export type Shape =
 	| 'pentagon'
 	| 'hexagon'
 	| 'octagon';
+
 type ToolState = {
 	brushSize: number;
 	color: string;

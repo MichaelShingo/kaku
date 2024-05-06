@@ -6,6 +6,7 @@ import {
 	decrementCanvasZoom,
 	incrementCanvasZoom,
 	MousePosition,
+	setIsCursorInCanvas,
 } from '@/redux/features/windowSlice';
 import { Shape } from '@/redux/features/toolSlice';
 
@@ -131,8 +132,8 @@ function App() {
 				const zoomAdjustedX = relativeX - centerOffset.x * canvasZoomDecimal * 0.7;
 				const zoomAdjustedY = relativeY - centerOffset.y * canvasZoomDecimal * 0.7;
 
-				console.log(relativeX, relativeY, zoomAdjustedX, zoomAdjustedY);
-				console.log(relativeX - zoomAdjustedX, relativeY - zoomAdjustedY);
+				// console.log(relativeX, relativeY, zoomAdjustedX, zoomAdjustedY);
+				// console.log(relativeX - zoomAdjustedX, relativeY - zoomAdjustedY);
 
 				ctx.beginPath();
 				ctx.moveTo(untransformedPoint.x, untransformedPoint.y);
@@ -141,8 +142,8 @@ function App() {
 					y: e.clientY,
 				});
 
-				ctx.lineTo(untransformedPoint.x, untransformedPoint.y);
-				// ctx.lineTo(e.clientX - boundingRect.left , e.clientY - boundingRect.top);
+				// ctx.lineTo(untransformedPoint.x, untransformedPoint.y);
+				ctx.lineTo(e.clientX - boundingRect.left, e.clientY - boundingRect.top);
 				ctx.strokeStyle = selectedTool === 'brush' ? color : '#ffffff';
 				ctx.lineWidth = brushSize;
 				ctx.lineCap = 'round';
@@ -180,11 +181,15 @@ function App() {
 	};
 	return (
 		<div className="flex h-full w-full items-center justify-center overflow-x-scroll overflow-y-scroll">
-			<div ref={canvasContainerRef} className="h-fit w-fit">
+			<div ref={canvasContainerRef} className="h-fit w-fit cursor-none">
 				<canvas
 					className="border-[3px] border-off-black"
 					ref={canvasRef}
-					onMouseEnter={(e) => setPosition(e)}
+					onMouseEnter={(e) => {
+						setPosition(e);
+						dispatch(setIsCursorInCanvas(true));
+					}}
+					onMouseLeave={() => dispatch(setIsCursorInCanvas(false))}
 					onMouseMove={(e) => {
 						setPosition(e);
 						draw(e);

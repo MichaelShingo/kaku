@@ -1,8 +1,7 @@
 'use client';
-import React, { ReactNode, useEffect } from 'react';
+import React, { ReactNode } from 'react';
 import { useAppSelector } from '@/redux/store';
-import { MousePosition, setMousePosition } from '@/redux/features/windowSlice';
-import { useDispatch } from 'react-redux';
+import { MousePosition } from '@/redux/features/windowSlice';
 import { Tool } from '@/redux/features/toolSlice';
 import {
 	faPlus,
@@ -16,7 +15,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { SizeProp } from '@fortawesome/fontawesome-svg-core';
 
 const ToolCursor = () => {
-	const dispatch = useDispatch();
 	const mousePosition: MousePosition = useAppSelector(
 		(state) => state.windowReducer.value.mousePosition
 	);
@@ -26,23 +24,17 @@ const ToolCursor = () => {
 	const isMouseDown: boolean = useAppSelector(
 		(state) => state.windowReducer.value.isMouseDown
 	);
+	const isCursorInCanvas: boolean = useAppSelector(
+		(state) => state.windowReducer.value.isCursorInCanvas
+	);
 	const brushSize: number = useAppSelector((state) => state.toolReducer.value.brushSize);
 
 	const brushSizePx = `${brushSize}px`;
 
-	useEffect(() => {
-		const handleMouseMove = (e: MouseEvent) => {
-			dispatch(setMousePosition({ x: e.clientX, y: e.clientY }));
-		};
-
-		window.addEventListener('mousemove', handleMouseMove);
-
-		return () => {
-			window.removeEventListener('mousemove', handleMouseMove);
-		};
-	}, []);
-
 	const renderCursor = (): ReactNode => {
+		if (!isCursorInCanvas) {
+			return <></>;
+		}
 		switch (selectedTool) {
 			case 'brush':
 			case 'eraser':
@@ -79,6 +71,7 @@ interface IconCursorProps {
 	icon: IconDefinition;
 	size: number;
 }
+
 const IconCursor: React.FC<IconCursorProps> = ({ icon, size }) => {
 	const mousePosition: MousePosition = useAppSelector(
 		(state) => state.windowReducer.value.mousePosition

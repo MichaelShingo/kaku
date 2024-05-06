@@ -5,11 +5,18 @@ type InitialState = {
 };
 
 export type Tool = 'brush' | 'shape' | 'eraser' | 'hand' | 'zoomIn' | 'zoomOut';
-
+export type Shape =
+	| 'circle'
+	| 'triangle'
+	| 'rectangle'
+	| 'pentagon'
+	| 'hexagon'
+	| 'octagon';
 type ToolState = {
 	brushSize: number;
 	color: string;
 	selectedTool: Tool;
+	selectedShape: Shape;
 };
 
 const initialState = {
@@ -17,6 +24,7 @@ const initialState = {
 		brushSize: 10,
 		color: '#000000',
 		selectedTool: 'brush',
+		selectedShape: 'rectangle',
 	} as ToolState,
 } as InitialState;
 
@@ -39,6 +47,9 @@ export const tool = createSlice({
 		setSelectedTool: (state, action: PayloadAction<Tool>) => {
 			state.value.selectedTool = action.payload;
 		},
+		setSelectedShape: (state, action: PayloadAction<Shape>) => {
+			state.value.selectedShape = action.payload;
+		},
 	},
 });
 
@@ -48,5 +59,6 @@ export const {
 	setSelectedTool,
 	incrementBrushSize,
 	decrementBrushSize,
+	setSelectedShape,
 } = tool.actions;
 export default tool.reducer;

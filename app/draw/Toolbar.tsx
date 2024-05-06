@@ -16,7 +16,6 @@ import {
 	IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
 import { setColor, setSelectedTool, Tool } from '@/redux/features/toolSlice';
-import { incrementCanvasZoom } from '@/redux/features/windowSlice';
 
 const Toolbar = () => {
 	const dispatch = useDispatch();

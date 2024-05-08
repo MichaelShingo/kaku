@@ -105,6 +105,15 @@ function App() {
 					return;
 				}
 				case 'triangle': {
+					ctx.beginPath();
+					ctx.moveTo(finalPosition.x, finalPosition.y);
+					ctx.lineTo(initialPosition.x, finalPosition.y);
+					ctx.lineTo(
+						initialPosition.x + (finalPosition.x - initialPosition.x) / 2,
+						initialPosition.y
+					);
+					ctx.lineTo(finalPosition.x, finalPosition.y);
+					ctx.fill();
 					return;
 				}
 				default:

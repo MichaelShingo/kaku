@@ -19,14 +19,13 @@ const MouseEvents = () => {
 		};
 
 		window.addEventListener('mousemove', handleMouseMove);
-
 		window.addEventListener('mousedown', handleMouseDown);
 		window.addEventListener('mouseup', handleMouseUp);
 
 		return () => {
+			window.removeEventListener('mousemove', handleMouseMove);
 			window.removeEventListener('mousedown', handleMouseDown);
 			window.removeEventListener('mouseup', handleMouseUp);
-			window.removeEventListener('mousemove', handleMouseMove);
 		};
 	}, []);
 

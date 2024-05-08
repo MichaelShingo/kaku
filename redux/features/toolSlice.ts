@@ -9,9 +9,9 @@ export const MIN_BRUSH_SIZE = 1;
 
 export type Tool = 'brush' | 'shape' | 'eraser' | 'hand' | 'zoomIn' | 'zoomOut';
 export type Shape =
+	| 'rectangle'
 	| 'circle'
 	| 'triangle'
-	| 'rectangle'
 	| 'pentagon'
 	| 'hexagon'
 	| 'octagon';

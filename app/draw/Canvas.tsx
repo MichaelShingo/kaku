@@ -15,6 +15,9 @@ function App() {
 	const canvasContainerRef = useRef<HTMLDivElement>(null);
 	const color = useAppSelector((state) => state.toolReducer.value.color);
 	const brushSize = useAppSelector((state) => state.toolReducer.value.brushSize);
+	const brushOpacity: number = useAppSelector(
+		(state) => state.toolReducer.value.brushOpacity
+	);
 	const canvasSize = useAppSelector((state) => state.windowReducer.value.canvasSize);
 	const selectedTool = useAppSelector((state) => state.toolReducer.value.selectedTool);
 	const canvasZoom = useAppSelector((state) => state.windowReducer.value.canvasZoom);
@@ -81,8 +84,29 @@ function App() {
 						finalPosition.y - initialPosition.y
 					);
 					return;
-				case 'circle':
+				case 'circle': {
+					const radiusX = (finalPosition.x - initialPosition.x) / 2;
+					const radiusY = (finalPosition.y - initialPosition.y) / 2;
+					const ellipseCenter: MousePosition = {
+						x: finalPosition.x - radiusX,
+						y: finalPosition.y - radiusY,
+					};
+					ctx.beginPath();
+					ctx.ellipse(
+						ellipseCenter.x,
+						ellipseCenter.y,
+						radiusX,
+						radiusY,
+						0,
+						0,
+						2 * Math.PI
+					);
+					ctx.fill();
 					return;
+				}
+				case 'triangle': {
+					return;
+				}
 				default:
 					return;
 			}
@@ -154,18 +178,15 @@ function App() {
 
 	const handleClick = (): void => {
 		switch (selectedTool) {
-			case 'brush':
-				return;
-			case 'shape':
-				return;
-			case 'eraser':
-				return;
 			case 'zoomIn':
 				dispatch(incrementCanvasZoom());
 				return;
 			case 'zoomOut':
 				dispatch(decrementCanvasZoom());
 				return;
+			case 'brush':
+			case 'shape':
+			case 'eraser':
 			default:
 				return;
 		}
@@ -199,14 +220,6 @@ function App() {
 						setInitialPosition(
 							calculateMousePositionOffset({ x: e.clientX, y: e.clientY })
 						);
-
-						// switch (selectedTool) {
-						// 	case 'brush':
-						// 	case 'eraser':
-						// 		setPosition(e);
-						// 	case 'shape':
-
-						// }
 					}}
 					onMouseUp={(e) => {
 						drawShape(e);

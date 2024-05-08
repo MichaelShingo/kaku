@@ -4,6 +4,9 @@ type InitialState = {
 	value: ToolState;
 };
 
+export const MAX_BRUSH_SIZE = 1000;
+export const MIN_BRUSH_SIZE = 1;
+
 export type Tool = 'brush' | 'shape' | 'eraser' | 'hand' | 'zoomIn' | 'zoomOut';
 export type Shape =
 	| 'circle'
@@ -18,6 +21,7 @@ type ToolState = {
 	color: string;
 	selectedTool: Tool;
 	selectedShape: Shape;
+	brushOpacity: number;
 };
 
 const initialState = {
@@ -26,6 +30,7 @@ const initialState = {
 		color: '#000000',
 		selectedTool: 'brush',
 		selectedShape: 'rectangle',
+		brushOpacity: 100,
 	} as ToolState,
 } as InitialState;
 
@@ -37,9 +42,15 @@ export const tool = createSlice({
 			state.value.brushSize = action.payload;
 		},
 		incrementBrushSize: (state) => {
+			if (state.value.brushSize === MAX_BRUSH_SIZE) {
+				return;
+			}
 			state.value.brushSize++;
 		},
 		decrementBrushSize: (state) => {
+			if (state.value.brushSize === MIN_BRUSH_SIZE) {
+				return;
+			}
 			state.value.brushSize--;
 		},
 		setColor: (state, action: PayloadAction<string>) => {
@@ -51,6 +62,11 @@ export const tool = createSlice({
 		setSelectedShape: (state, action: PayloadAction<Shape>) => {
 			state.value.selectedShape = action.payload;
 		},
+		setBrushOpacity: (state, action: PayloadAction<number>) => {
+			let val = action.payload > 100 ? 100 : action.payload;
+			val = action.payload < 0 ? 0 : val;
+			state.value.brushOpacity = val;
+		},
 	},
 });
 
@@ -61,5 +77,6 @@ export const {
 	incrementBrushSize,
 	decrementBrushSize,
 	setSelectedShape,
+	setBrushOpacity,
 } = tool.actions;
 export default tool.reducer;

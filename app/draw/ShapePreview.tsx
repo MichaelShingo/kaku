@@ -10,6 +10,7 @@ const ShapePreview = () => {
 		(state) => state.windowReducer.value.mousePosition
 	);
 	const selectedTool = useAppSelector((state) => state.toolReducer.value.selectedTool);
+	const selectedShape = useAppSelector((state) => state.toolReducer.value.selectedShape);
 	const isCursorInCanvas = useAppSelector(
 		(state) => state.windowReducer.value.isCursorInCanvas
 	);
@@ -32,12 +33,13 @@ const ShapePreview = () => {
 		<>
 			{isShapePreviewVisible ? (
 				<div
-					className="absolute border-2 border-black bg-transparent z-50"
+					className="absolute z-50 border-2 border-black bg-transparent"
 					style={{
 						left: `${initialPosition.x}px`,
 						top: `${initialPosition.y}px`,
 						width: `${mousePosition.x - initialPosition.x}px`,
 						height: `${mousePosition.y - initialPosition.y}px`,
+						borderRadius: selectedShape === 'circle' ? '100%' : '0%',
 					}}
 				></div>
 			) : (

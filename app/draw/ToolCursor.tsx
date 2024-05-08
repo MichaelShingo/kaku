@@ -40,7 +40,7 @@ const ToolCursor = () => {
 			case 'eraser':
 				return (
 					<div
-						className="pointer-events-none absolute rounded-full border-2 opacity-50 z-50"
+						className="pointer-events-none absolute z-50 rounded-full border-2 opacity-50"
 						style={{
 							top: `${mousePosition.y}px`,
 							left: `${mousePosition.x}px`,

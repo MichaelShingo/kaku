@@ -13,6 +13,7 @@ type InitialState = {
 };
 
 type WindowState = {
+	canvasCTX: CanvasRenderingContext2D | null;
 	windowHeight: number;
 	windowWidth: number;
 	mousePosition: MousePosition;
@@ -21,10 +22,13 @@ type WindowState = {
 	canvasZoom: number;
 	isMouseDown: boolean;
 	isCursorInCanvas: boolean;
+	canvasHistory: string[];
+	currentHistoryIndex: number;
 };
 
 const initialState = {
 	value: {
+		canvasCTX: null,
 		windowHeight: 0,
 		windowWidth: 0,
 		mousePosition: { x: 0, y: 0 },
@@ -33,6 +37,8 @@ const initialState = {
 		canvasZoom: 100,
 		isMouseDown: false,
 		isCursorInCanvas: false,
+		canvasHistory: [],
+		currentHistoryIndex: -1,
 	} as WindowState,
 } as InitialState;
 
@@ -70,6 +76,25 @@ export const window = createSlice({
 		setIsCursorInCanvas: (state, action: PayloadAction<boolean>) => {
 			state.value.isCursorInCanvas = action.payload;
 		},
+		appendCanvasHistory: (state, action: PayloadAction<string>) => {
+			let newVal: string[];
+
+			if (state.value.currentHistoryIndex < state.value.canvasHistory.length - 1) {
+				newVal = state.value.canvasHistory.slice(0, state.value.currentHistoryIndex + 1);
+			} else {
+				newVal = [...state.value.canvasHistory];
+			}
+			newVal.push(action.payload);
+			if (state.value.canvasHistory.length >= 20) {
+				newVal.slice(1, newVal.length - 1);
+			}
+
+			state.value.canvasHistory = newVal;
+			state.value.currentHistoryIndex = newVal.length - 1;
+		},
+		setCurrentHistoryIndex: (state, action: PayloadAction<number>) => {
+			state.value.currentHistoryIndex = action.payload;
+		},
 	},
 });
 
@@ -84,5 +109,7 @@ export const {
 	decrementCanvasZoom,
 	setIsMouseDown,
 	setIsCursorInCanvas,
+	appendCanvasHistory,
+	setCurrentHistoryIndex,
 } = window.actions;
 export default window.reducer;

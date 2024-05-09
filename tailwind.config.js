@@ -14,14 +14,12 @@ module.exports = {
 				imageIcon: 'url("/imageIcon.svg")',
 			},
 			animation: {
-				'scroll-music': 'scroll-music 17s infinite linear',
+				'color-shift': 'color-shift 1s infinite linear alternate',
 			},
 			keyframes: {
-				'scroll-music': {
-					'0%': { opacity: '0%', transform: 'translate(260px)' },
-					'5%': { opacity: '100%' },
-					'95%': { opacity: '100%' },
-					'100%': { opacity: '0%', transform: 'translate(-250px)' },
+				'color-shift': {
+					'0%': { backgroundColor: '#d972ff' },
+					'100%': { backgroundColor: '#01baef' },
 				},
 			},
 		},

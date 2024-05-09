@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useAppSelector } from '@/redux/store';
 import { useDispatch } from 'react-redux';
 import {
+	appendCanvasHistory,
 	decrementCanvasZoom,
 	incrementCanvasZoom,
 	MousePosition,
@@ -31,6 +32,12 @@ function App() {
 	const [boundingRect, setBoundingRect] = useState<DOMRect | null>(null);
 	const [canvasCenter, setCanvasCenter] = useState<MousePosition>({ x: 0, y: 0 });
 	const [initialPosition, setInitialPosition] = useState<MousePosition>({ x: 0, y: 0 });
+	const canvasHistory: string[] = useAppSelector(
+		(state) => state.windowReducer.value.canvasHistory
+	);
+	const currentHistoryIndex: number = useAppSelector(
+		(state) => state.windowReducer.value.currentHistoryIndex
+	);
 
 	useEffect(() => {
 		const canvas = canvasRef.current;
@@ -39,7 +46,12 @@ function App() {
 			canvas.width = canvasSize.x;
 			canvas.height = canvasSize.y;
 			setCanvasCTX(ctx);
+			if (ctx) {
+				ctx.fillStyle = 'white';
+				ctx.fillRect(0, 0, canvasSize.x, canvasSize.y);
+			}
 		}
+		addToHistory();
 	}, [canvasRef]);
 
 	useEffect(() => {
@@ -53,6 +65,13 @@ function App() {
 			setCanvasCenter({ x: boundingRect.width / 2, y: boundingRect.height / 2 });
 		}
 	}, [boundingRect]);
+
+	const addToHistory = () => {
+		if (canvasRef.current) {
+			const canvasData: string = canvasRef.current.toDataURL();
+			dispatch(appendCanvasHistory(canvasData));
+		}
+	};
 
 	const setPosition = (e: React.MouseEvent) => {
 		setMouseData({
@@ -83,7 +102,7 @@ function App() {
 						finalPosition.x - initialPosition.x,
 						finalPosition.y - initialPosition.y
 					);
-					return;
+					break;
 				case 'circle': {
 					const radiusX = (finalPosition.x - initialPosition.x) / 2;
 					const radiusY = (finalPosition.y - initialPosition.y) / 2;
@@ -102,7 +121,7 @@ function App() {
 						2 * Math.PI
 					);
 					ctx.fill();
-					return;
+					break;
 				}
 				case 'triangle': {
 					ctx.beginPath();
@@ -114,11 +133,12 @@ function App() {
 					);
 					ctx.lineTo(finalPosition.x, finalPosition.y);
 					ctx.fill();
-					return;
+					break;
 				}
 				default:
-					return;
+					break;
 			}
+			addToHistory();
 		}
 	};
 
@@ -133,10 +153,8 @@ function App() {
 			const mouseX = e.clientX - canvasRef.current.getBoundingClientRect().left;
 			const mouseY = e.clientY - canvasRef.current.getBoundingClientRect().top;
 			if (selectedTool === 'eraser' || selectedTool === 'brush') {
-				const canvasZoomDecimal: number = canvasZoom / 100 - 1;
-
-				// manually scale the boundRect?
-				// where does .left .top fall once zoomed?
+				// USE TRANSFORMATION MATRIX
+				// https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/transform
 
 				const transform = canvasCTX.getTransform();
 				const inverseTransform = transform.invertSelf();
@@ -146,28 +164,6 @@ function App() {
 					y: mouseY,
 				});
 
-				const relativeX = mouseData.x - boundingRect.left;
-				const relativeY = mouseData.y - boundingRect.top;
-				const centerOffset: MousePosition = {
-					x: relativeX - canvasCenter.x,
-					y: relativeY - canvasCenter.y,
-				};
-				// console.log('center offset');
-				// console.log(centerOffset);
-				// console.log('###############');
-				// console.log(`Cavnas Zoom = ${canvasZoomDecimal}`);
-				// console.log(`Mouse position = ${mouseData.x} ${mouseData.y}`);
-				// console.log(canvasRef.current.offsetLeft, canvasRef.current.offsetTop);
-
-				// on the right track, but the proportion is not linear according to canvasZoomDecimal?
-				// what if the proportion is lograithm or something
-				// what if you calculate offset and compensate it based on (0,0) as (left, top)????
-				const zoomAdjustedX = relativeX - centerOffset.x * canvasZoomDecimal * 0.7;
-				const zoomAdjustedY = relativeY - centerOffset.y * canvasZoomDecimal * 0.7;
-
-				// console.log(relativeX, relativeY, zoomAdjustedX, zoomAdjustedY);
-				// console.log(relativeX - zoomAdjustedX, relativeY - zoomAdjustedY);
-
 				ctx.beginPath();
 				ctx.moveTo(untransformedPoint.x, untransformedPoint.y);
 				setMouseData({
@@ -175,12 +171,12 @@ function App() {
 					y: e.clientY,
 				});
 
-				// ctx.lineTo(untransformedPoint.x, untransformedPoint.y);
 				ctx.lineTo(e.clientX - boundingRect.left, e.clientY - boundingRect.top);
 				ctx.strokeStyle = selectedTool === 'brush' ? color : '#ffffff';
 				ctx.lineWidth = brushSize;
 				ctx.lineCap = 'round';
 				ctx.stroke();
+				addToHistory();
 			}
 		}
 	};
@@ -213,6 +209,7 @@ function App() {
 		<div className="flex h-full w-full items-center justify-center overflow-x-scroll overflow-y-scroll">
 			<div ref={canvasContainerRef} className="h-fit w-fit cursor-none">
 				<canvas
+					id="canvas"
 					className="border-[3px] border-off-black"
 					ref={canvasRef}
 					onMouseEnter={(e) => {

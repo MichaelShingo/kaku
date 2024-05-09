@@ -15,9 +15,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ReactNode } from 'react';
 import { useDispatch } from 'react-redux';
 import { COLORS } from '../utils/colors';
+import { getCanvasContext } from '../utils/canvasContext';
 
 const ContextualMenu = () => {
 	const dispatch = useDispatch();
+	const canvasSize = useAppSelector((state) => state.windowReducer.value.canvasSize);
 	const selectedTool: Tool = useAppSelector(
 		(state) => state.toolReducer.value.selectedTool
 	);
@@ -26,6 +28,12 @@ const ContextualMenu = () => {
 	);
 	const brushSize: number = useAppSelector((state) => state.toolReducer.value.brushSize);
 
+	const generateMusic = (): void => {
+		const ctx = getCanvasContext();
+		const imageData: ImageData = ctx.getImageData(0, 0, canvasSize.x, canvasSize.y);
+		console.log(imageData.data);
+		return;
+	};
 	const renderButtons = (): ReactNode => {
 		switch (selectedTool) {
 			case 'brush':
@@ -78,6 +86,17 @@ const ContextualMenu = () => {
 							</div>
 						</div>
 					</>
+				);
+			case 'music':
+				return (
+					<div className="flex flex-row items-center gap-2">
+						<button
+							className="bg-light-pink p-2 text-off-white transition-all hover:animate-color-shift"
+							onClick={generateMusic}
+						>
+							Generate Music
+						</button>
+					</div>
 				);
 
 			default:

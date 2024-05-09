@@ -10,6 +10,7 @@ import {
 	IconDefinition,
 	faMagnifyingGlassPlus,
 	faMagnifyingGlassMinus,
+	faCircleExclamation,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { SizeProp } from '@fortawesome/fontawesome-svg-core';
@@ -60,7 +61,7 @@ const ToolCursor = () => {
 			case 'zoomOut':
 				return <IconCursor icon={faMagnifyingGlassMinus} size={2} />;
 			default:
-				return <></>;
+				return <IconCursor icon={faCircleExclamation} size={2} />;
 		}
 	};
 

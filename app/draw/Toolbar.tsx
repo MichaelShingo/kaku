@@ -59,6 +59,14 @@ const Toolbar = () => {
 		dispatch(setCurrentHistoryIndex(currentHistoryIndex + 1));
 	};
 
+	const save = () => {
+		console.log('save');
+	};
+
+	const createNewFile = () => {
+		console.log('new file');
+	};
+
 	return (
 		<div className="absolute left-0 top-0 z-10 flex h-[100vh] w-14 flex-col items-center justify-center overflow-hidden bg-off-black">
 			<div className="flex h-[85%] flex-col items-center justify-evenly">
@@ -72,16 +80,8 @@ const Toolbar = () => {
 				<div id="separator" className="h-[1px] w-[60%] bg-slate-600"></div>
 				<FunctionButton id="undo" icon={faArrowLeft} handleClick={undo} />
 				<FunctionButton id="redo" icon={faArrowRight} handleClick={redo} />
-				<FunctionButton
-					id="save"
-					icon={faSave}
-					handleClick={() => console.log('Click Function Button')}
-				/>
-				<FunctionButton
-					id="new-file"
-					icon={faFileCirclePlus}
-					handleClick={() => console.log('Click Function Button')}
-				/>
+				<FunctionButton icon={faSave} handleClick={save} />
+				<FunctionButton icon={faFileCirclePlus} handleClick={createNewFile} />
 				<input
 					className="h-11 w-11"
 					type="color"
@@ -119,7 +119,7 @@ const ToolButton: React.FC<ToolButtonProps> = ({ toolName, icon }) => {
 };
 
 type FunctionButtonProps = {
-	id: string;
+	id?: string;
 	icon: IconDefinition;
 	handleClick: () => void;
 };

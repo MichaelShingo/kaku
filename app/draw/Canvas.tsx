@@ -6,7 +6,7 @@ import {
 	appendCanvasHistory,
 	decrementCanvasZoom,
 	incrementCanvasZoom,
-	MousePosition,
+	Coordinate,
 	setIsCursorInCanvas,
 } from '@/redux/features/windowSlice';
 import { Shape } from '@/redux/features/toolSlice';
@@ -30,8 +30,8 @@ function App() {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const [canvasCTX, setCanvasCTX] = useState<CanvasRenderingContext2D | null>(null);
 	const [boundingRect, setBoundingRect] = useState<DOMRect | null>(null);
-	const [canvasCenter, setCanvasCenter] = useState<MousePosition>({ x: 0, y: 0 });
-	const [initialPosition, setInitialPosition] = useState<MousePosition>({ x: 0, y: 0 });
+	const [canvasCenter, setCanvasCenter] = useState<Coordinate>({ x: 0, y: 0 });
+	const [initialPosition, setInitialPosition] = useState<Coordinate>({ x: 0, y: 0 });
 	const canvasHistory: string[] = useAppSelector(
 		(state) => state.windowReducer.value.canvasHistory
 	);
@@ -87,7 +87,7 @@ function App() {
 
 		const ctx = canvasCTX;
 		const canvasContainer = canvasContainerRef.current;
-		const finalPosition: MousePosition = calculateMousePositionOffset({
+		const finalPosition: Coordinate = calculateMousePositionOffset({
 			x: e.clientX,
 			y: e.clientY,
 		});
@@ -106,7 +106,7 @@ function App() {
 				case 'circle': {
 					const radiusX = (finalPosition.x - initialPosition.x) / 2;
 					const radiusY = (finalPosition.y - initialPosition.y) / 2;
-					const ellipseCenter: MousePosition = {
+					const ellipseCenter: Coordinate = {
 						x: finalPosition.x - radiusX,
 						y: finalPosition.y - radiusY,
 					};
@@ -197,7 +197,7 @@ function App() {
 		}
 	};
 
-	const calculateMousePositionOffset = (position: MousePosition): MousePosition => {
+	const calculateMousePositionOffset = (position: Coordinate): Coordinate => {
 		if (canvasRef.current) {
 			const mouseX = position.x - canvasRef.current.getBoundingClientRect().left;
 			const mouseY = position.y - canvasRef.current.getBoundingClientRect().top;

@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-export type MousePosition = {
+export type Coordinate = {
 	x: number;
 	y: number;
 };
@@ -16,7 +16,7 @@ type WindowState = {
 	canvasCTX: CanvasRenderingContext2D | null;
 	windowHeight: number;
 	windowWidth: number;
-	mousePosition: MousePosition;
+	mousePosition: Coordinate;
 	isDragging: boolean;
 	canvasSize: CanvasSize;
 	canvasZoom: number;
@@ -33,7 +33,7 @@ const initialState = {
 		windowWidth: 0,
 		mousePosition: { x: 0, y: 0 },
 		isDragging: false,
-		canvasSize: { x: 500, y: 500 },
+		canvasSize: { x: 5, y: 5 },
 		canvasZoom: 100,
 		isMouseDown: false,
 		isCursorInCanvas: false,
@@ -52,7 +52,7 @@ export const window = createSlice({
 		setWidth: (state, action: PayloadAction<number>) => {
 			state.value.windowWidth = action.payload;
 		},
-		setMousePosition: (state, action: PayloadAction<MousePosition>) => {
+		setMousePosition: (state, action: PayloadAction<Coordinate>) => {
 			state.value.mousePosition = action.payload;
 		},
 		setIsDragging: (state, action: PayloadAction<boolean>) => {

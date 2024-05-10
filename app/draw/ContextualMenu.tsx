@@ -16,6 +16,7 @@ import { ReactNode } from 'react';
 import { useDispatch } from 'react-redux';
 import { COLORS } from '../utils/colors';
 import { getCanvasContext } from '../utils/canvasContext';
+import { generateMusic } from '../utils/pixelAnalysis';
 
 const ContextualMenu = () => {
 	const dispatch = useDispatch();
@@ -28,10 +29,10 @@ const ContextualMenu = () => {
 	);
 	const brushSize: number = useAppSelector((state) => state.toolReducer.value.brushSize);
 
-	const generateMusic = (): void => {
+	const handleGenerateMusic = (): void => {
 		const ctx = getCanvasContext();
 		const imageData: ImageData = ctx.getImageData(0, 0, canvasSize.x, canvasSize.y);
-		console.log(imageData.data);
+		generateMusic(imageData);
 		return;
 	};
 	const renderButtons = (): ReactNode => {
@@ -92,7 +93,7 @@ const ContextualMenu = () => {
 					<div className="flex flex-row items-center gap-2">
 						<button
 							className="bg-light-pink p-2 text-off-white transition-all hover:animate-color-shift"
-							onClick={generateMusic}
+							onClick={handleGenerateMusic}
 						>
 							Generate Music
 						</button>

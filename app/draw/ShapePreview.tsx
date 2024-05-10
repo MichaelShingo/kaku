@@ -1,12 +1,12 @@
 'use client';
-import { MousePosition } from '@/redux/features/windowSlice';
+import { Coordinate } from '@/redux/features/windowSlice';
 import { useAppSelector } from '@/redux/store';
 import { ReactNode, useEffect } from 'react';
 
-let initialPosition: MousePosition = { x: Infinity, y: Infinity };
+let initialPosition: Coordinate = { x: Infinity, y: Infinity };
 const ShapePreview = () => {
 	const isMouseDown = useAppSelector((state) => state.windowReducer.value.isMouseDown);
-	const mousePosition: MousePosition = useAppSelector(
+	const mousePosition: Coordinate = useAppSelector(
 		(state) => state.windowReducer.value.mousePosition
 	);
 	const selectedTool = useAppSelector((state) => state.toolReducer.value.selectedTool);

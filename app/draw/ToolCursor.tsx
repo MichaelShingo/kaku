@@ -1,7 +1,7 @@
 'use client';
 import React, { ReactNode } from 'react';
 import { useAppSelector } from '@/redux/store';
-import { MousePosition } from '@/redux/features/windowSlice';
+import { Coordinate } from '@/redux/features/windowSlice';
 import { Tool } from '@/redux/features/toolSlice';
 import {
 	faPlus,
@@ -16,7 +16,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { SizeProp } from '@fortawesome/fontawesome-svg-core';
 
 const ToolCursor = () => {
-	const mousePosition: MousePosition = useAppSelector(
+	const mousePosition: Coordinate = useAppSelector(
 		(state) => state.windowReducer.value.mousePosition
 	);
 	const selectedTool: Tool = useAppSelector(
@@ -74,7 +74,7 @@ interface IconCursorProps {
 }
 
 const IconCursor: React.FC<IconCursorProps> = ({ icon, size }) => {
-	const mousePosition: MousePosition = useAppSelector(
+	const mousePosition: Coordinate = useAppSelector(
 		(state) => state.windowReducer.value.mousePosition
 	);
 

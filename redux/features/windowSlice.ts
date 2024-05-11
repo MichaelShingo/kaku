@@ -33,7 +33,7 @@ const initialState = {
 		windowWidth: 0,
 		mousePosition: { x: 0, y: 0 },
 		isDragging: false,
-		canvasSize: { x: 5, y: 5 },
+		canvasSize: { x: 100, y: 100 },
 		canvasZoom: 100,
 		isMouseDown: false,
 		isCursorInCanvas: false,

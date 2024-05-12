@@ -1,5 +1,4 @@
 import { Coordinate } from '@/redux/features/windowSlice';
-import { Deque } from './Deque';
 import isEqual from 'lodash/isEqual';
 
 export type HSL = {
@@ -12,43 +11,51 @@ export type HSL = {
 type Island = {
 	hsl: HSL;
 	pixels: Coordinate[];
-	minX: number;
-	maxX: number;
+	colCounts: Record<number, number>; // num pixels in each col
+	minCol: number;
+	maxCol: number;
 };
 
 export const generateMusic = (imageData: ImageData): void => {
 	const grid: HSL[][] = imageDataToGrid(imageData);
-	console.log(grid);
-	const islands: number = findIslands(grid);
+	const islands: Island[] = findIslands(grid);
 	console.log('Islands: ', islands);
 };
 
-const visited: Set<string> = new Set(); // must clear this if you call generate 2x
-
-function findIslands(grid: HSL[][] | null[][]): number {
+const findIslands = (grid: HSL[][] | null[][]): Island[] => {
+	const visited: Set<string> = new Set();
 	const [ROWS, COLS] = [grid.length, grid[0].length];
-	visited.clear();
+	const islands: Island[] = [];
 
-	let islands = 0;
+	visited.clear();
 
 	for (let i = 0; i < ROWS; i++) {
 		for (let j = 0; j < COLS; j++) {
-			// console.log(i, j);
-			const res: boolean = bfs(grid, i, j);
+			const res: Island | null = bfs(grid, i, j, visited);
 			if (res) {
-				islands++;
+				islands.push(res);
 			}
 		}
 	}
-
 	return islands;
-}
+};
 
-const bfs = (grid: HSL[][] | null[][], r: number, c: number): boolean => {
+const bfs = (
+	grid: HSL[][] | null[][],
+	r: number,
+	c: number,
+	visited: Set<string>
+): Island | null => {
 	if (visited.has(`${r}x${c}`)) {
-		return false;
+		return null;
 	}
-	console.log('##### BFS ######');
+	const island: Island = {
+		hsl: grid[r][c] as HSL,
+		pixels: [],
+		colCounts: { 0: 2 },
+		minCol: Infinity,
+		maxCol: -Infinity,
+	};
 	const [ROWS, COLS] = [grid.length, grid[0].length];
 
 	const directions = [
@@ -62,18 +69,10 @@ const bfs = (grid: HSL[][] | null[][], r: number, c: number): boolean => {
 	visited.add(`${r}x${c}`);
 
 	while (queue.length > 0) {
-		// console.log('~~~~ DIRECTIONS ~~~~~');
-		//dequeues the first element(current)
 		const [cr, cc] = queue.shift() as number[];
-		// if (visited.has(`${cr}x${cc}`)) {
-		// 	continue;
-		// }
-		// console.log('current', cr, cc);
-		// console.log(visited);
 
 		directions.forEach(([dr, dc]) => {
 			const [nr, nc] = [cr + dr, cc + dc];
-			// console.log('next', nr, nc);
 			if (
 				nr >= 0 &&
 				nc >= 0 &&
@@ -82,13 +81,26 @@ const bfs = (grid: HSL[][] | null[][], r: number, c: number): boolean => {
 				!visited.has(`${nr}x${nc}`) &&
 				isEqual(grid[nr][nc], grid[cr][cc])
 			) {
-				console.log(grid[nr][nc], grid[cr][cc]);
 				queue.push([nr, nc]);
 				visited.add(`${nr}x${nc}`);
+				// island.pixels.push();
+
+				if (nc in island.colCounts) {
+					island.colCounts[nc] += 1;
+				} else {
+					island.colCounts[nc] = 1;
+				}
+
+				if (nc < island.minCol) {
+					island.minCol = nc;
+				}
+				if (nc > island.maxCol) {
+					island.maxCol = nc;
+				}
 			}
 		});
 	}
-	return true;
+	return island;
 };
 
 const imageDataToGrid = (imageData: ImageData): HSL[][] => {

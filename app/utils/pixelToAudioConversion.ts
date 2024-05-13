@@ -8,6 +8,9 @@ export const hlToFrequency = (hue: number, lightness: number): number => {
 	const pitchClass: number = hueToPitchClass(hue);
 	const frequencyOct0: number = mapPitchClassOct0ToFrequency(pitchClass);
 	const octave: number = lightnessToOctave(lightness);
+	console.log(hue, lightness);
+	console.log('pitchClass', 'frequencyOct0', 'octave');
+	console.log(pitchClass, frequencyOct0, octave);
 	return calcOctXFrequency(frequencyOct0, octave);
 };
 

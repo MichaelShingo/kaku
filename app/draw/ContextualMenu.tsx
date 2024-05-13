@@ -34,6 +34,7 @@ const ContextualMenu = () => {
 	const brushSize: number = useAppSelector((state) => state.toolReducer.value.brushSize);
 
 	const handleGenerateMusic = (): void => {
+		Tone.start();
 		const ctx = getCanvasContext();
 		const imageData: ImageData = ctx.getImageData(0, 0, canvasSize.x, canvasSize.y);
 		const islands: Island[] = generateMusic(imageData);
@@ -48,6 +49,7 @@ const ContextualMenu = () => {
 				const frequency = hlToFrequency(island.hsl.h, island.hsl.l);
 				const startTime = calcSecondsFromPixels(island.minCol);
 				polySynth.triggerAttackRelease(frequency, duration, startTime);
+				console.log(frequency, duration, startTime);
 			}
 		});
 	};

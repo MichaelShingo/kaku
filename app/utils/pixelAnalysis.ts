@@ -74,7 +74,7 @@ const findIslands = (grid: HSL[][] | null[][]): Island[] => {
 	for (let i = 0; i < ROWS; i++) {
 		for (let j = 0; j < COLS; j++) {
 			const res: Island | null = bfs(grid, i, j, visited);
-			if (res) {
+			if (res && res?.hsl.l !== 100) {
 				islands.push(res);
 			}
 		}

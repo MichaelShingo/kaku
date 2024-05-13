@@ -1,11 +1,10 @@
 import Canvas from './Canvas';
 import KeyboardEvents from '../components/eventListeners/KeyboardEvents';
-import Toolbar from './Toolbar';
-import Playbar from './Playbar';
-import ToolCursor from './ToolCursor';
+import Toolbar from './tool/Toolbar';
+import ToolCursor from './tool/ToolCursor';
 import MouseEvents from '../components/eventListeners/MouseEvents';
-import ShapePreview from './ShapePreview';
-import ContextualMenu from './ContextualMenu';
+import ShapePreview from './tool/ShapePreview';
+import ContextualMenu from './contextualMenu/ContextualMenu';
 
 export default function Home() {
 	return (
@@ -14,7 +13,6 @@ export default function Home() {
 			<ToolCursor />
 			<ContextualMenu />
 			<Toolbar />
-			<Playbar />
 			<Canvas />
 			<KeyboardEvents />
 			<MouseEvents />

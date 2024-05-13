@@ -1,10 +1,11 @@
+'use client';
 import { getCanvasContext } from '@/app/utils/canvasContext';
 import { generateMusic, Island } from '@/app/utils/pixelAnalysis';
 import { calcSecondsFromPixels, hlToFrequency } from '@/app/utils/pixelToAudioConversion';
 import { useAppSelector } from '@/redux/store';
 import React, { useEffect } from 'react';
 import * as Tone from 'tone';
-import { setIsPlaying } from '@/redux/features/audioSlice';
+import { setIsPlaying, setSeconds } from '@/redux/features/audioSlice';
 import { useDispatch } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { COLORS } from '@/app/utils/colors';
@@ -16,6 +17,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 let polySynth: Tone.PolySynth;
+let scheduleRepeaterId: number = -1;
 
 const MusicMenu = () => {
 	const dispatch = useDispatch();
@@ -26,13 +28,17 @@ const MusicMenu = () => {
 	const canvasSize = useAppSelector((state) => state.windowReducer.value.canvasSize);
 
 	const handleGenerateMusic = (): void => {
-		Tone.start();
 		const ctx = getCanvasContext();
 		const imageData: ImageData = ctx.getImageData(0, 0, canvasSize.x, canvasSize.y);
 		const islands: Island[] = generateMusic(imageData);
 		scheduleMidi(islands);
-		Tone.Transport.start();
 	};
+
+	useEffect(() => {
+		if (!isPlaying && polySynth) {
+			polySynth.releaseAll();
+		}
+	}, [isPlaying]);
 
 	const scheduleMidi = (islands: Island[]): void => {
 		islands.forEach((island) => {
@@ -54,18 +60,43 @@ const MusicMenu = () => {
 				release: 1,
 			},
 		}).toDestination();
+		polySynth.sync();
 	}, []);
 
 	const stopAudio = () => {
 		dispatch(setIsPlaying(false));
+		Tone.Transport.clear(scheduleRepeaterId);
+		Tone.Transport.stop();
+		dispatch(setSeconds(0));
+	};
+
+	const checkIsEndofAudio = (transportTime: number, audioDuration: number) => {
+		if (transportTime > audioDuration) {
+			stopAudio();
+		}
 	};
 
 	const playAudio = () => {
+		Tone.start();
+		const startTime: number = seconds;
+		Tone.Transport.seconds = startTime;
+		Tone.Transport.start();
 		dispatch(setIsPlaying(true));
+		console.log(Tone.Transport.bpm);
+
+		scheduleRepeaterId = Tone.Transport.scheduleRepeat(
+			() =>
+				checkIsEndofAudio(Tone.Transport.seconds, calcSecondsFromPixels(canvasSize.x)),
+			0.3,
+			0
+		);
 	};
 
 	const pauseAudio = () => {
+		Tone.Transport.pause();
+		const currentTime: number = Tone.Transport.seconds;
 		dispatch(setIsPlaying(false));
+		dispatch(setSeconds(currentTime));
 	};
 
 	return (

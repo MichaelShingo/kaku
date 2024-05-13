@@ -1,4 +1,5 @@
 'use client';
+import * as Tone from 'tone';
 import {
 	MAX_BRUSH_SIZE,
 	MIN_BRUSH_SIZE,
@@ -12,11 +13,14 @@ import { faSquare, faCircle, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { useAppSelector } from '@/redux/store';
 import { IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { COLORS } from '../utils/colors';
 import { getCanvasContext } from '../utils/canvasContext';
-import { generateMusic } from '../utils/pixelAnalysis';
+import { generateMusic, Island } from '../utils/pixelAnalysis';
+import { calcSecondsFromPixels, hlToFrequency } from '../utils/pixelToAudioConversion';
+
+let polySynth: Tone.PolySynth;
 
 const ContextualMenu = () => {
 	const dispatch = useDispatch();
@@ -32,9 +36,33 @@ const ContextualMenu = () => {
 	const handleGenerateMusic = (): void => {
 		const ctx = getCanvasContext();
 		const imageData: ImageData = ctx.getImageData(0, 0, canvasSize.x, canvasSize.y);
-		generateMusic(imageData);
-		return;
+		const islands: Island[] = generateMusic(imageData);
+		scheduleMidi(islands);
+		Tone.Transport.start();
 	};
+
+	const scheduleMidi = (islands: Island[]): void => {
+		islands.forEach((island) => {
+			const duration = calcSecondsFromPixels(island.maxCol - island.minCol);
+			if (duration > 0) {
+				const frequency = hlToFrequency(island.hsl.h, island.hsl.l);
+				const startTime = calcSecondsFromPixels(island.minCol);
+				polySynth.triggerAttackRelease(frequency, duration, startTime);
+			}
+		});
+	};
+
+	useEffect(() => {
+		polySynth = new Tone.PolySynth(Tone.Synth, {
+			envelope: {
+				attack: 0.02,
+				decay: 0.1,
+				sustain: 0.3,
+				release: 1,
+			},
+		}).toDestination();
+	}, []);
+
 	const renderButtons = (): ReactNode => {
 		switch (selectedTool) {
 			case 'brush':

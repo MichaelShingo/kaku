@@ -7,19 +7,61 @@ export type HSL = {
 	l: number;
 };
 
-// list of adjacent pixels of the same color and their X coordinate span
-type Island = {
+export type Island = {
 	hsl: HSL;
 	pixels: Coordinate[];
-	colCounts: Record<number, number>; // num pixels in each col
+	colCounts: Record<number, number>;
 	minCol: number;
 	maxCol: number;
 };
 
-export const generateMusic = (imageData: ImageData): void => {
+export const generateMusic = (imageData: ImageData): Island[] => {
 	const grid: HSL[][] = imageDataToGrid(imageData);
-	const islands: Island[] = findIslands(grid);
-	console.log('Islands: ', islands);
+	return findIslands(grid);
+};
+
+const imageDataToGrid = (imageData: ImageData): HSL[][] => {
+	const res: HSL[][] = [];
+	const data: Uint8ClampedArray = imageData.data;
+	for (let i = 0; i < imageData.height; i++) {
+		const row: HSL[] = [];
+		for (let j = 0; j < imageData.width * 4; j += 4) {
+			const index = i * imageData.width * 4 + j;
+			const hsl: HSL = rgbToHsl(data[index], data[index + 1], data[index + 2]);
+			row.push(hsl);
+		}
+		res.push(row);
+	}
+	return res;
+};
+
+const rgbToHsl = (r: number, g: number, b: number): HSL => {
+	r /= 255;
+	g /= 255;
+	b /= 255;
+	const max = Math.max(r, g, b);
+	const min = Math.min(r, g, b);
+	let h = 0;
+	let s = 0;
+	const l = (max + min) / 2;
+
+	if (max !== min) {
+		const d = max - min;
+		s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+		switch (max) {
+			case r:
+				h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+				break;
+			case g:
+				h = ((b - r) / d + 2) / 6;
+				break;
+			case b:
+				h = ((r - g) / d + 4) / 6;
+				break;
+		}
+	}
+
+	return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
 };
 
 const findIslands = (grid: HSL[][] | null[][]): Island[] => {
@@ -101,48 +143,4 @@ const bfs = (
 		});
 	}
 	return island;
-};
-
-const imageDataToGrid = (imageData: ImageData): HSL[][] => {
-	const res: HSL[][] = [];
-	const data: Uint8ClampedArray = imageData.data;
-	for (let i = 0; i < imageData.height; i++) {
-		const row: HSL[] = [];
-		for (let j = 0; j < imageData.width * 4; j += 4) {
-			const index = i * imageData.width * 4 + j;
-			const hsl: HSL = rgbToHsl(data[index], data[index + 1], data[index + 2]);
-			row.push(hsl);
-		}
-		res.push(row);
-	}
-	return res;
-};
-
-const rgbToHsl = (r: number, g: number, b: number): HSL => {
-	r /= 255;
-	g /= 255;
-	b /= 255;
-	const max = Math.max(r, g, b);
-	const min = Math.min(r, g, b);
-	let h = 0;
-	let s = 0;
-	const l = (max + min) / 2;
-
-	if (max !== min) {
-		const d = max - min;
-		s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-		switch (max) {
-			case r:
-				h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
-				break;
-			case g:
-				h = ((b - r) / d + 2) / 6;
-				break;
-			case b:
-				h = ((r - g) / d + 4) / 6;
-				break;
-		}
-	}
-
-	return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
 };

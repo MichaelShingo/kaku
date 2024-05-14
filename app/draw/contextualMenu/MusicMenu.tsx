@@ -16,6 +16,7 @@ import {
 	IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
 
+let limiter: Tone.Limiter;
 let polySynth: Tone.PolySynth;
 let scheduleRepeaterId: number = -1;
 
@@ -41,6 +42,9 @@ const MusicMenu = () => {
 	}, [isPlaying]);
 
 	const scheduleMidi = (islands: Island[]): void => {
+		// do you need a separate synth for each one, so you can apply fine control over envelope curve?
+		// to prevent excessive synth #, you could schedule multiple non-overlapping ranges in the same synth?
+
 		islands.forEach((island) => {
 			const duration = calcSecondsFromPixels(island.maxCol - island.minCol);
 			if (duration > 0) {
@@ -52,6 +56,7 @@ const MusicMenu = () => {
 	};
 
 	useEffect(() => {
+		limiter = new Tone.Limiter(-6).toDestination();
 		polySynth = new Tone.PolySynth(Tone.Synth, {
 			envelope: {
 				attack: 0.02,
@@ -59,7 +64,11 @@ const MusicMenu = () => {
 				sustain: 0.3,
 				release: 1,
 			},
+			volume: -6,
+			portamento: 5,
 		}).toDestination();
+		polySynth.connect(limiter);
+		polySynth.maxPolyphony = 100;
 		polySynth.sync();
 	}, []);
 

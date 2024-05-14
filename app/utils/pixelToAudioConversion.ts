@@ -10,9 +10,7 @@ export const hlToFrequency = (hue: number, lightness: number): number => {
 	const pitchClass: number = hueToPitchClass(hue);
 	const frequencyOct0: number = mapPitchClassOct0ToFrequency(pitchClass);
 	const octave: number = lightnessToOctave(lightness);
-	console.log(hue, lightness);
-	console.log('pitchClass', 'frequencyOct0', 'octave');
-	console.log(pitchClass, frequencyOct0, octave);
+
 	return calcOctXFrequency(frequencyOct0, octave);
 };
 
@@ -57,4 +55,21 @@ export const calcMaxSimultaneousVoices = (islands: Island[]): number => {
 	}
 
 	return max;
+};
+
+export const doesRangeOverlap = (
+	currentSynthRanges: number[][],
+	newRange: number[]
+): boolean => {
+	for (let i = 0; i < currentSynthRanges.length; i++) {
+		const range = currentSynthRanges[i];
+		if (
+			(newRange[0] >= range[0] && newRange[0] <= range[1]) ||
+			(newRange[1] >= range[0] && newRange[1] <= range[1]) ||
+			(newRange[0] < range[0] && newRange[1] > range[1])
+		) {
+			return true;
+		}
+	}
+	return false;
 };

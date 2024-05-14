@@ -4,6 +4,7 @@ import { generateMusic, Island } from '@/app/utils/pixelAnalysis';
 import {
 	calcMaxSimultaneousVoices,
 	calcSecondsFromPixels,
+	doesRangeOverlap,
 	hlToFrequency,
 } from '@/app/utils/pixelToAudioConversion';
 import { useAppSelector } from '@/redux/store';
@@ -41,26 +42,56 @@ const MusicMenu = () => {
 
 	useEffect(() => {
 		if (!isPlaying) {
-			// polySynth.releaseAll();
+			synths.forEach((synth) => {
+				synth.triggerRelease();
+			});
 		}
 	}, [isPlaying]);
 
 	const scheduleMidi = (islands: Island[]): void => {
-		// do you need a separate synth for each one, so you can apply fine control over envelope curve?
-		// to prevent excessive synth #, you could schedule multiple non-overlapping ranges in the same synth?
-
-		// find max # of overlapping ranges
 		const maxSimultaneousVoices: number = calcMaxSimultaneousVoices(islands);
-		console.log('max voices', maxSimultaneousVoices);
+
+		for (let i = 0; i < maxSimultaneousVoices; i++) {
+			const synth = new Tone.Synth();
+			synth.sync();
+			synth.toDestination();
+			synths.push(synth);
+		}
+
+		const scheduledRanges: number[][][] = [];
+		for (let i = 0; i < maxSimultaneousVoices; i++) {
+			scheduledRanges.push([]);
+		}
 
 		islands.forEach((island) => {
 			const duration = calcSecondsFromPixels(island.maxCol - island.minCol);
 			if (duration > 0) {
 				const frequency = hlToFrequency(island.hsl.h, island.hsl.l);
 				const startTime = calcSecondsFromPixels(island.minCol);
-				// polySynth.triggerAttackRelease(frequency, duration, startTime);
+
+				let currentSynthIndex = 0;
+				let isOverlapping = true;
+				const currentRange = [island.minCol, island.maxCol];
+
+				while (isOverlapping && currentSynthIndex < maxSimultaneousVoices) {
+					isOverlapping = doesRangeOverlap(
+						scheduledRanges[currentSynthIndex],
+						currentRange
+					);
+					if (!isOverlapping) {
+						scheduledRanges[currentSynthIndex].push(currentRange);
+						synths[currentSynthIndex].triggerAttackRelease(
+							frequency,
+							duration,
+							startTime
+						);
+					}
+					currentSynthIndex++;
+				}
 			}
 		});
+
+		console.log('scheduled ranges', scheduledRanges);
 	};
 
 	const stopAudio = () => {

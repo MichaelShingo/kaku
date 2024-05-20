@@ -1,7 +1,12 @@
 'use client';
 import { getCanvasContext } from '@/app/utils/canvasContext';
 import { generateMusic, Island } from '@/app/utils/pixelAnalysis';
-import { calcSecondsFromPixels, hlToFrequency } from '@/app/utils/pixelToAudioConversion';
+import {
+	calcMaxSimultaneousVoices,
+	calcSecondsFromPixels,
+	doesRangeOverlap,
+	hlToFrequency,
+} from '@/app/utils/pixelToAudioConversion';
 import { useAppSelector } from '@/redux/store';
 import React, { useEffect } from 'react';
 import * as Tone from 'tone';
@@ -17,7 +22,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 let limiter: Tone.Limiter;
-let polySynth: Tone.PolySynth;
+const synths: Tone.Synth[] = [];
 let scheduleRepeaterId: number = -1;
 
 const MusicMenu = () => {
@@ -36,41 +41,58 @@ const MusicMenu = () => {
 	};
 
 	useEffect(() => {
-		if (!isPlaying && polySynth) {
-			polySynth.releaseAll();
+		if (!isPlaying) {
+			synths.forEach((synth) => {
+				synth.triggerRelease();
+			});
 		}
 	}, [isPlaying]);
 
 	const scheduleMidi = (islands: Island[]): void => {
-		// do you need a separate synth for each one, so you can apply fine control over envelope curve?
-		// to prevent excessive synth #, you could schedule multiple non-overlapping ranges in the same synth?
+		const maxSimultaneousVoices: number = calcMaxSimultaneousVoices(islands);
+
+		for (let i = 0; i < maxSimultaneousVoices; i++) {
+			const synth = new Tone.Synth();
+			synth.sync();
+			synth.toDestination();
+			synths.push(synth);
+		}
+
+		const scheduledRanges: number[][][] = [];
+		for (let i = 0; i < maxSimultaneousVoices; i++) {
+			scheduledRanges.push([]);
+		}
 
 		islands.forEach((island) => {
 			const duration = calcSecondsFromPixels(island.maxCol - island.minCol);
 			if (duration > 0) {
 				const frequency = hlToFrequency(island.hsl.h, island.hsl.l);
 				const startTime = calcSecondsFromPixels(island.minCol);
-				polySynth.triggerAttackRelease(frequency, duration, startTime);
+
+				let currentSynthIndex = 0;
+				let isOverlapping = true;
+				const currentRange = [island.minCol, island.maxCol];
+
+				while (isOverlapping && currentSynthIndex < maxSimultaneousVoices) {
+					isOverlapping = doesRangeOverlap(
+						scheduledRanges[currentSynthIndex],
+						currentRange
+					);
+					if (!isOverlapping) {
+						scheduledRanges[currentSynthIndex].push(currentRange);
+						synths[currentSynthIndex].triggerAttackRelease(
+							frequency,
+							duration,
+							startTime
+						);
+					}
+					currentSynthIndex++;
+				}
 			}
 		});
-	};
 
-	useEffect(() => {
-		limiter = new Tone.Limiter(-6).toDestination();
-		polySynth = new Tone.PolySynth(Tone.Synth, {
-			envelope: {
-				attack: 0.02,
-				decay: 0.1,
-				sustain: 0.3,
-				release: 1,
-			},
-			volume: -6,
-			portamento: 5,
-		}).toDestination();
-		polySynth.connect(limiter);
-		polySynth.maxPolyphony = 100;
-		polySynth.sync();
-	}, []);
+		console.log('scheduled ranges', scheduledRanges);
+	};
 
 	const stopAudio = () => {
 		dispatch(setIsPlaying(false));

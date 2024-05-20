@@ -1,3 +1,5 @@
+import { Island } from './pixelAnalysis';
+
 const PIXELS_PER_SECOND = 16;
 
 export const calcSecondsFromPixels = (colRange: number): number => {
@@ -8,9 +10,7 @@ export const hlToFrequency = (hue: number, lightness: number): number => {
 	const pitchClass: number = hueToPitchClass(hue);
 	const frequencyOct0: number = mapPitchClassOct0ToFrequency(pitchClass);
 	const octave: number = lightnessToOctave(lightness);
-	console.log(hue, lightness);
-	console.log('pitchClass', 'frequencyOct0', 'octave');
-	console.log(pitchClass, frequencyOct0, octave);
+
 	return calcOctXFrequency(frequencyOct0, octave);
 };
 
@@ -30,4 +30,46 @@ const hueToPitchClass = (hue: number): number => {
 
 const lightnessToOctave = (lightness: number): number => {
 	return Math.ceil(lightness / 20 + 1);
+};
+
+export const calcMaxSimultaneousVoices = (islands: Island[]): number => {
+	let max = 0;
+	let count = 0;
+	const data = [];
+
+	for (let i = 0; i < islands.length; i++) {
+		data.push([islands[i].minCol, 'x']);
+		data.push([islands[i].maxCol, 'y']);
+	}
+
+	data.sort((a, b) => (a[0] as number) - (b[0] as number));
+
+	for (let i = 0; i < data.length; i++) {
+		if (data[i][1] === 'x') {
+			count++;
+		} else if (data[i][1] === 'y') {
+			count--;
+		}
+
+		max = Math.max(max, count);
+	}
+
+	return max;
+};
+
+export const doesRangeOverlap = (
+	currentSynthRanges: number[][],
+	newRange: number[]
+): boolean => {
+	for (let i = 0; i < currentSynthRanges.length; i++) {
+		const range = currentSynthRanges[i];
+		if (
+			(newRange[0] >= range[0] && newRange[0] <= range[1]) ||
+			(newRange[1] >= range[0] && newRange[1] <= range[1]) ||
+			(newRange[0] < range[0] && newRange[1] > range[1])
+		) {
+			return true;
+		}
+	}
+	return false;
 };

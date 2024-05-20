@@ -13,6 +13,7 @@ import { Shape } from '@/redux/features/toolSlice';
 
 function App() {
 	const dispatch = useDispatch();
+	const [isDrawing, setIsDrawing] = useState<boolean>(false);
 	const canvasContainerRef = useRef<HTMLDivElement>(null);
 	const color = useAppSelector((state) => state.toolReducer.value.color);
 	const brushSize = useAppSelector((state) => state.toolReducer.value.brushSize);
@@ -26,18 +27,10 @@ function App() {
 		(state) => state.toolReducer.value.selectedShape
 	);
 
-	const [mouseData, setMouseData] = useState({ x: 0, y: 0 });
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const [canvasCTX, setCanvasCTX] = useState<CanvasRenderingContext2D | null>(null);
 	const [boundingRect, setBoundingRect] = useState<DOMRect | null>(null);
-	const [canvasCenter, setCanvasCenter] = useState<Coordinate>({ x: 0, y: 0 });
 	const [initialPosition, setInitialPosition] = useState<Coordinate>({ x: 0, y: 0 });
-	const canvasHistory: string[] = useAppSelector(
-		(state) => state.windowReducer.value.canvasHistory
-	);
-	const currentHistoryIndex: number = useAppSelector(
-		(state) => state.windowReducer.value.currentHistoryIndex
-	);
 
 	useEffect(() => {
 		const canvas = canvasRef.current;
@@ -60,24 +53,11 @@ function App() {
 		}
 	}, [canvasSize, canvasZoom]);
 
-	useEffect(() => {
-		if (boundingRect) {
-			setCanvasCenter({ x: boundingRect.width / 2, y: boundingRect.height / 2 });
-		}
-	}, [boundingRect]);
-
 	const addToHistory = () => {
 		if (canvasRef.current) {
 			const canvasData: string = canvasRef.current.toDataURL();
 			dispatch(appendCanvasHistory(canvasData));
 		}
-	};
-
-	const setPosition = (e: React.MouseEvent) => {
-		setMouseData({
-			x: e.clientX,
-			y: e.clientY,
-		});
 	};
 
 	const drawShape = (e: React.MouseEvent) => {
@@ -142,43 +122,43 @@ function App() {
 		}
 	};
 
+	const startDrawing = (e: React.MouseEvent) => {
+		setIsDrawing(true);
+		if (canvasCTX && boundingRect) {
+			canvasCTX.strokeStyle = selectedTool === 'brush' ? color : '#ffffff';
+			canvasCTX.lineWidth = brushSize;
+			canvasCTX.lineCap = 'round';
+			canvasCTX.lineJoin = 'round';
+			canvasCTX.lineTo(
+				e.clientX - boundingRect.left - 2,
+				e.clientY - boundingRect.top - 2
+			);
+			canvasCTX.stroke();
+		}
+		draw(e);
+	};
+
 	const draw = (e: React.MouseEvent) => {
-		if (e.buttons !== 1) {
-			return; // checks left mouse button
+		const isDrawingTool = selectedTool === 'eraser' || selectedTool === 'brush';
+		const isLeftMouseButton = e.buttons === 1;
+		if (!isDrawing || !isLeftMouseButton || !isDrawingTool) {
+			return;
 		}
-		const ctx = canvasCTX;
+
 		const canvasContainer = canvasContainerRef.current;
+		const areObjectsAvailable =
+			canvasCTX && canvasContainer && boundingRect && canvasRef.current;
 
-		if (ctx && canvasContainer && boundingRect && canvasRef.current) {
-			const mouseX = e.clientX - canvasRef.current.getBoundingClientRect().left;
-			const mouseY = e.clientY - canvasRef.current.getBoundingClientRect().top;
-			if (selectedTool === 'eraser' || selectedTool === 'brush') {
-				// USE TRANSFORMATION MATRIX
-				// https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/transform
-
-				const transform = canvasCTX.getTransform();
-				const inverseTransform = transform.invertSelf();
-
-				const untransformedPoint = inverseTransform.transformPoint({
-					x: mouseX,
-					y: mouseY,
-				});
-
-				ctx.beginPath();
-				ctx.moveTo(untransformedPoint.x, untransformedPoint.y);
-				setMouseData({
-					x: e.clientX,
-					y: e.clientY,
-				});
-
-				ctx.lineTo(e.clientX - boundingRect.left, e.clientY - boundingRect.top);
-				ctx.strokeStyle = selectedTool === 'brush' ? color : '#ffffff';
-				ctx.lineWidth = brushSize;
-				ctx.lineCap = 'round';
-				ctx.stroke();
-				addToHistory();
-			}
+		if (areObjectsAvailable) {
+			canvasCTX.lineTo(e.clientX - boundingRect.left, e.clientY - boundingRect.top);
+			canvasCTX.stroke();
 		}
+	};
+
+	const stopDrawing = () => {
+		setIsDrawing(false);
+		canvasCTX?.beginPath();
+		addToHistory();
 	};
 
 	const handleClick = (): void => {
@@ -213,22 +193,21 @@ function App() {
 					className="border-[3px] border-off-black"
 					ref={canvasRef}
 					onMouseEnter={(e) => {
-						setPosition(e);
 						dispatch(setIsCursorInCanvas(true));
 					}}
 					onMouseLeave={() => dispatch(setIsCursorInCanvas(false))}
 					onMouseMove={(e) => {
-						setPosition(e);
 						draw(e);
 					}}
 					onMouseDown={(e) => {
-						setPosition(e);
+						startDrawing(e);
 						setInitialPosition(
 							calculateMousePositionOffset({ x: e.clientX, y: e.clientY })
 						);
 					}}
 					onMouseUp={(e) => {
 						drawShape(e);
+						stopDrawing();
 					}}
 					onClick={handleClick}
 					style={{

@@ -21,15 +21,17 @@ import {
 	IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
 
-let limiter: Tone.Limiter;
-const synths: Tone.Synth[] = [];
+// let limiter: Tone.Limiter;
+const synths: Tone.PolySynth[] = [];
 let scheduleRepeaterId: number = -1;
+
+// let releaseEventIds: number[] = [];
 
 const MusicMenu = () => {
 	const dispatch = useDispatch();
 	const isPlaying = useAppSelector((state) => state.audioReducer.value.isPlaying);
-	const tempo = useAppSelector((state) => state.audioReducer.value.tempo);
-	const volume = useAppSelector((state) => state.audioReducer.value.volume);
+	// const tempo = useAppSelector((state) => state.audioReducer.value.tempo);
+	// const volume = useAppSelector((state) => state.audioReducer.value.volume);
 	const seconds = useAppSelector((state) => state.audioReducer.value.seconds);
 	const canvasSize = useAppSelector((state) => state.windowReducer.value.canvasSize);
 
@@ -43,19 +45,27 @@ const MusicMenu = () => {
 	useEffect(() => {
 		if (!isPlaying) {
 			synths.forEach((synth) => {
-				synth.triggerRelease();
+				synth.releaseAll();
+				// const releaseEventId: number = Tone.Transport.schedule((time) => {
+				// 	console.log('trigger release id', releaseEventId);
+				// }, Tone.Transport.seconds + 0.2);
+				// releaseEventIds.push(releaseEventId);
 			});
 		}
 	}, [isPlaying]);
 
 	const scheduleMidi = (islands: Island[]): void => {
+		// releaseEventIds = [];
 		const maxSimultaneousVoices: number = calcMaxSimultaneousVoices(islands);
 
-		for (let i = 0; i < maxSimultaneousVoices; i++) {
-			const synth = new Tone.Synth();
-			synth.sync();
-			synth.toDestination();
-			synths.push(synth);
+		Tone.Transport.cancel();
+		const newSynthCount = maxSimultaneousVoices - synths.length;
+		for (let i = 0; i < newSynthCount; i++) {
+			const polySynth = new Tone.PolySynth();
+			polySynth.sync();
+			polySynth.toDestination();
+			polySynth.debug = true;
+			synths.push(polySynth);
 		}
 
 		const scheduledRanges: number[][][] = [];
@@ -85,19 +95,26 @@ const MusicMenu = () => {
 							duration,
 							startTime
 						);
+						// control volume envelope of this synth when you schedule the attackRelease
+						// get a list of heights for the island then approximate with a curve??
 					}
 					currentSynthIndex++;
 				}
 			}
 		});
-
-		console.log('scheduled ranges', scheduledRanges);
 	};
 
 	const stopAudio = () => {
 		dispatch(setIsPlaying(false));
 		Tone.Transport.clear(scheduleRepeaterId);
 		Tone.Transport.stop();
+		// setTimeout(() => {
+		// 	releaseEventIds.forEach((id) => {
+		// 		Tone.Transport.clear(id);
+		// 		console.log('clearing', id);
+		// 	});
+		// 	releaseEventIds = [];
+		// }, 1000);
 		dispatch(setSeconds(0));
 	};
 
@@ -107,13 +124,15 @@ const MusicMenu = () => {
 		}
 	};
 
-	const playAudio = () => {
-		Tone.start();
+	const playAudio = async () => {
+		await Tone.start();
+
 		const startTime: number = seconds;
 		Tone.Transport.seconds = startTime;
-		Tone.Transport.start();
+		console.log('transport starting at time', Tone.Transport.seconds, startTime, seconds);
+
+		Tone.Transport.start(); // must adjust this for pausing function
 		dispatch(setIsPlaying(true));
-		console.log(Tone.Transport.bpm);
 
 		scheduleRepeaterId = Tone.Transport.scheduleRepeat(
 			() =>

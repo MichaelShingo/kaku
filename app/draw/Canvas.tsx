@@ -31,6 +31,7 @@ function App() {
 	const [canvasCTX, setCanvasCTX] = useState<CanvasRenderingContext2D | null>(null);
 	const [boundingRect, setBoundingRect] = useState<DOMRect | null>(null);
 	const [initialPosition, setInitialPosition] = useState<Coordinate>({ x: 0, y: 0 });
+	const isDrawingTool = selectedTool === 'eraser' || selectedTool === 'brush';
 
 	useEffect(() => {
 		const canvas = canvasRef.current;
@@ -123,6 +124,9 @@ function App() {
 	};
 
 	const startDrawing = (e: React.MouseEvent) => {
+		if (!isDrawingTool) {
+			return;
+		}
 		setIsDrawing(true);
 		if (canvasCTX && boundingRect) {
 			canvasCTX.strokeStyle = selectedTool === 'brush' ? color : '#ffffff';
@@ -139,7 +143,6 @@ function App() {
 	};
 
 	const draw = (e: React.MouseEvent) => {
-		const isDrawingTool = selectedTool === 'eraser' || selectedTool === 'brush';
 		const isLeftMouseButton = e.buttons === 1;
 		if (!isDrawing || !isLeftMouseButton || !isDrawingTool) {
 			return;
@@ -156,6 +159,9 @@ function App() {
 	};
 
 	const stopDrawing = () => {
+		if (!isDrawingTool) {
+			return;
+		}
 		setIsDrawing(false);
 		canvasCTX?.beginPath();
 		addToHistory();

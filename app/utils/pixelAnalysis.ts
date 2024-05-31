@@ -11,6 +11,7 @@ export type Island = {
 	hsl: HSL;
 	pixels: Coordinate[];
 	colCounts: Record<number, number>;
+	colCountMax: number;
 	minCol: number;
 	maxCol: number;
 };
@@ -74,11 +75,21 @@ const findIslands = (grid: HSL[][] | null[][]): Island[] => {
 	for (let i = 0; i < ROWS; i++) {
 		for (let j = 0; j < COLS; j++) {
 			const res: Island | null = bfs(grid, i, j, visited);
-			if (res && res?.hsl.l !== 100) {
+			const isValidIsland: boolean =
+				res !== null &&
+				res?.hsl.l !== 100 &&
+				res.maxCol - res.minCol > 3 &&
+				res.maxCol !== Infinity &&
+				res.minCol !== -Infinity &&
+				res.colCountMax > 3;
+
+			if (res && isValidIsland) {
 				islands.push(res);
 			}
 		}
 	}
+
+	console.log('islands', islands);
 	return islands;
 };
 
@@ -94,10 +105,12 @@ const bfs = (
 	const island: Island = {
 		hsl: grid[r][c] as HSL,
 		pixels: [],
-		colCounts: { 0: 2 },
+		colCounts: {},
+		colCountMax: 1,
 		minCol: Infinity,
 		maxCol: -Infinity,
 	};
+
 	const [ROWS, COLS] = [grid.length, grid[0].length];
 
 	const directions = [
@@ -129,6 +142,9 @@ const bfs = (
 
 				if (nc in island.colCounts) {
 					island.colCounts[nc] += 1;
+					if (island.colCounts[nc] > island.colCountMax) {
+						island.colCountMax = island.colCounts[nc];
+					}
 				} else {
 					island.colCounts[nc] = 1;
 				}

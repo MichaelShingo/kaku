@@ -25,8 +25,6 @@ import {
 const synths: Tone.PolySynth[] = [];
 let scheduleRepeaterId: number = -1;
 
-// let releaseEventIds: number[] = [];
-
 const MusicMenu = () => {
 	const dispatch = useDispatch();
 	const isPlaying = useAppSelector((state) => state.audioReducer.value.isPlaying);
@@ -46,10 +44,6 @@ const MusicMenu = () => {
 		if (!isPlaying) {
 			synths.forEach((synth) => {
 				synth.releaseAll();
-				// const releaseEventId: number = Tone.Transport.schedule((time) => {
-				// 	console.log('trigger release id', releaseEventId);
-				// }, Tone.Transport.seconds + 0.2);
-				// releaseEventIds.push(releaseEventId);
 			});
 		}
 	}, [isPlaying]);
@@ -108,13 +102,6 @@ const MusicMenu = () => {
 		dispatch(setIsPlaying(false));
 		Tone.Transport.clear(scheduleRepeaterId);
 		Tone.Transport.stop();
-		// setTimeout(() => {
-		// 	releaseEventIds.forEach((id) => {
-		// 		Tone.Transport.clear(id);
-		// 		console.log('clearing', id);
-		// 	});
-		// 	releaseEventIds = [];
-		// }, 1000);
 		dispatch(setSeconds(0));
 	};
 
@@ -129,8 +116,6 @@ const MusicMenu = () => {
 
 		const startTime: number = seconds;
 		Tone.Transport.seconds = startTime;
-		console.log('transport starting at time', Tone.Transport.seconds, startTime, seconds);
-
 		Tone.Transport.start(); // must adjust this for pausing function
 		dispatch(setIsPlaying(true));
 

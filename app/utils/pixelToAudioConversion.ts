@@ -20,15 +20,6 @@ export const mapRange = (
 	return outMin + ((value - inMin) * (outMax - outMin)) / (inMax - inMin);
 };
 
-// export const mapHeightPixelsToGain = (
-// 	heightPixels: number,
-// 	canvasHeight: number
-// ): number => {
-// 	const newRange = 7;
-// 	canvasHeight *
-// 	return heightPixels / canvasHeight;
-// };
-
 export const hlToFrequency = (hue: number, lightness: number): number => {
 	const pitchClass: number = hueToPitchClass(hue);
 	const frequencyOct0: number = mapPitchClassOct0ToFrequency(pitchClass);

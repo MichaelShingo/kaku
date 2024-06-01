@@ -27,7 +27,6 @@ import { Coordinate } from '@/redux/features/windowSlice';
 // let limiter: Tone.Limiter;
 const synths: Tone.PolySynth[] = [];
 const gainNodes: Tone.Gain[] = [];
-let gainFunctions: ((time: number) => void)[] = [];
 let gainFunctionRepeaterIds: number[] = [];
 
 let scheduleRepeaterId: number = -1;
@@ -60,10 +59,10 @@ const MusicMenu = () => {
 			Tone.Transport.clear(id);
 		});
 
-		gainFunctions = [];
 		gainFunctionRepeaterIds = [];
 
 		const maxSimultaneousVoices: number = calcMaxSimultaneousVoices(islands);
+		// what is max possible gain based on this, then scale the gain of each synth by this factor
 
 		Tone.Transport.cancel();
 		const newSynthCount = maxSimultaneousVoices - synths.length;
@@ -117,13 +116,18 @@ const MusicMenu = () => {
 				const slope = (point2.y - point1.y) / (point2.x - point1.x);
 				const estimatedHeightPixels: number =
 					slope * pixelX - slope * point1.x + point1.y;
-				const volume = mapRange(estimatedHeightPixels, 0, canvasSize.y, 0, 1);
+				const gainRange = 2 / maxSimultaneousVoices;
+				const volume = mapRange(
+					estimatedHeightPixels,
+					0,
+					canvasSize.y,
+					-1,
+					-1 + gainRange
+				);
 				if (volume) {
 					gainNodes[island.synthIndex].gain.value = volume;
 				}
 			};
-
-			gainFunctions.push(calcGainAtTime);
 
 			const gainFunctionRepeaterId: number = Tone.Transport.scheduleRepeat(
 				() => {

@@ -49,22 +49,20 @@ const MusicMenu = () => {
 	const canvasSize = useAppSelector((state) => state.windowReducer.value.canvasSize);
 
 	const handleGenerateMusic = (): void => {
-		console.log('laoding ');
-
+		dispatch(setIsLoading(true));
 		const ctx = getCanvasContext();
 		const imageData: ImageData = ctx.getImageData(0, 0, canvasSize.x, canvasSize.y);
 
-		// dispatch(setLoadingMessage('Parsing note data...'));
+		dispatch(setLoadingMessage('Traversing your pixels...'));
+		const worker = new Worker(new URL('/public/workers.ts', import.meta.url));
+		worker.postMessage({ imageData });
 
-		const islands: Island[] = generateMusic(imageData);
-
-		// dispatch(setLoadingMessage('Scheduling midi notes...'));
-
-		scheduleMidi(islands);
-
-		// dispatch(setLoadingMessage('Ready!'));
-		console.log('done');
-		dispatch(setIsLoading(false));
+		worker.onmessage = function (e) {
+			const { islands } = e.data;
+			scheduleMidi(islands);
+			dispatch(setLoadingMessage(''));
+			dispatch(setIsLoading(false));
+		};
 	};
 
 	useEffect(() => {
@@ -205,14 +203,7 @@ const MusicMenu = () => {
 		<div className="flex flex-row items-center gap-2">
 			<button
 				className="bg-light-pink p-2 text-off-white transition-all hover:animate-color-shift active:scale-95"
-				onClick={() => {
-					dispatch(setIsLoading(true));
-					dispatch(setLoadingMessage('Extracting canvas data...'));
-
-					setTimeout(() => {
-						handleGenerateMusic();
-					}, 100);
-				}}
+				onClick={handleGenerateMusic}
 			>
 				Generate Music
 			</button>

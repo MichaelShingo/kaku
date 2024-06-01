@@ -3,9 +3,11 @@ import { getCanvasContext } from '@/app/utils/canvasContext';
 import { generateMusic, Island } from '@/app/utils/pixelAnalysis';
 import {
 	calcMaxSimultaneousVoices,
+	calcPixelsFromTime,
 	calcSecondsFromPixels,
 	doesRangeOverlap,
 	hlToFrequency,
+	mapRange,
 } from '@/app/utils/pixelToAudioConversion';
 import { useAppSelector } from '@/redux/store';
 import React, { useEffect } from 'react';
@@ -20,9 +22,14 @@ import {
 	faStop,
 	IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
+import { Coordinate } from '@/redux/features/windowSlice';
 
 // let limiter: Tone.Limiter;
 const synths: Tone.PolySynth[] = [];
+const gainNodes: Tone.Gain[] = [];
+let gainFunctions: ((time: number) => void)[] = [];
+let gainFunctionRepeaterIds: number[] = [];
+
 let scheduleRepeaterId: number = -1;
 
 const MusicMenu = () => {
@@ -49,17 +56,24 @@ const MusicMenu = () => {
 	}, [isPlaying]);
 
 	const scheduleMidi = (islands: Island[]): void => {
-		// releaseEventIds = [];
+		gainFunctionRepeaterIds.forEach((id) => {
+			Tone.Transport.clear(id);
+		});
+
+		gainFunctions = [];
+		gainFunctionRepeaterIds = [];
+
 		const maxSimultaneousVoices: number = calcMaxSimultaneousVoices(islands);
 
 		Tone.Transport.cancel();
 		const newSynthCount = maxSimultaneousVoices - synths.length;
 		for (let i = 0; i < newSynthCount; i++) {
-			const polySynth = new Tone.PolySynth();
+			const polySynth = new Tone.PolySynth().toDestination();
+			const gainNode = new Tone.Gain(1).toDestination();
 			polySynth.sync();
-			polySynth.toDestination();
-			polySynth.debug = true;
+			polySynth.connect(gainNode);
 			synths.push(polySynth);
+			gainNodes.push(gainNode);
 		}
 
 		const scheduledRanges: number[][][] = [];
@@ -69,33 +83,62 @@ const MusicMenu = () => {
 
 		islands.forEach((island) => {
 			const duration = calcSecondsFromPixels(island.maxCol - island.minCol);
-			if (duration > 0) {
-				const frequency = hlToFrequency(island.hsl.h, island.hsl.l);
-				const startTime = calcSecondsFromPixels(island.minCol);
+			const startTime = calcSecondsFromPixels(island.minCol);
+			const frequency = hlToFrequency(island.hsl.h, island.hsl.l);
 
-				let currentSynthIndex = 0;
-				let isOverlapping = true;
-				const currentRange = [island.minCol, island.maxCol];
+			let currentSynthIndex = 0;
+			let isOverlapping = true;
+			const currentRange = [island.minCol, island.maxCol];
 
-				while (isOverlapping && currentSynthIndex < maxSimultaneousVoices) {
-					isOverlapping = doesRangeOverlap(
-						scheduledRanges[currentSynthIndex],
-						currentRange
-					);
-					if (!isOverlapping) {
-						scheduledRanges[currentSynthIndex].push(currentRange);
-						synths[currentSynthIndex].triggerAttackRelease(
-							frequency,
-							duration,
-							startTime
-						);
-						// control volume envelope of this synth when you schedule the attackRelease
-						// get a list of heights for the island then approximate with a curve??
-					}
-					currentSynthIndex++;
+			while (isOverlapping && currentSynthIndex < maxSimultaneousVoices) {
+				isOverlapping = doesRangeOverlap(
+					scheduledRanges[currentSynthIndex],
+					currentRange
+				);
+				if (!isOverlapping) {
+					scheduledRanges[currentSynthIndex].push(currentRange);
+					island.synthIndex = currentSynthIndex;
+					synths[currentSynthIndex].triggerAttackRelease(frequency, duration, startTime);
 				}
+				currentSynthIndex++;
 			}
+
+			const calcGainAtTime = (time: number): void => {
+				const pixelX = calcPixelsFromTime(time);
+				const point1: Coordinate = {
+					x: Math.floor(pixelX),
+					y: island.colCounts[Math.floor(pixelX)],
+				};
+				const point2: Coordinate = {
+					x: Math.ceil(pixelX),
+					y: island.colCounts[Math.ceil(pixelX)],
+				};
+
+				const slope = (point2.y - point1.y) / (point2.x - point1.x);
+				const estimatedHeightPixels: number =
+					slope * pixelX - slope * point1.x + point1.y;
+				const volume = mapRange(estimatedHeightPixels, 0, canvasSize.y, 0, 1);
+				if (volume) {
+					gainNodes[island.synthIndex].gain.value = volume;
+				}
+			};
+
+			gainFunctions.push(calcGainAtTime);
+
+			const gainFunctionRepeaterId: number = Tone.Transport.scheduleRepeat(
+				() => {
+					calcGainAtTime(Tone.Transport.seconds);
+				},
+				0.1,
+				startTime,
+				duration
+			);
+
+			gainFunctionRepeaterIds.push(gainFunctionRepeaterId);
 		});
+		// console.log(synths);
+		// console.log(gainNodes);
+		// console.log(gainFunctions);
 	};
 
 	const stopAudio = () => {

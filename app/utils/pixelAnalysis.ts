@@ -14,6 +14,8 @@ export type Island = {
 	colCountMax: number;
 	minCol: number;
 	maxCol: number;
+	synthIndex: number;
+	colCountsGT1: number;
 };
 
 export const generateMusic = (imageData: ImageData): Island[] => {
@@ -81,7 +83,8 @@ const findIslands = (grid: HSL[][] | null[][]): Island[] => {
 				res.maxCol - res.minCol > 3 &&
 				res.maxCol !== Infinity &&
 				res.minCol !== -Infinity &&
-				res.colCountMax > 3;
+				res.colCountMax > 3 &&
+				res.colCountsGT1 > 3;
 
 			if (res && isValidIsland) {
 				islands.push(res);
@@ -109,6 +112,8 @@ const bfs = (
 		colCountMax: 1,
 		minCol: Infinity,
 		maxCol: -Infinity,
+		synthIndex: -1,
+		colCountsGT1: 0,
 	};
 
 	const [ROWS, COLS] = [grid.length, grid[0].length];
@@ -138,7 +143,6 @@ const bfs = (
 			) {
 				queue.push([nr, nc]);
 				visited.add(`${nr}x${nc}`);
-				// island.pixels.push();
 
 				if (nc in island.colCounts) {
 					island.colCounts[nc] += 1;
@@ -147,6 +151,10 @@ const bfs = (
 					}
 				} else {
 					island.colCounts[nc] = 1;
+				}
+
+				if (island.colCounts[nc] === 2) {
+					island.colCountsGT1++;
 				}
 
 				if (nc < island.minCol) {

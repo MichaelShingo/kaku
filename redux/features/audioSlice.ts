@@ -11,6 +11,8 @@ type AudioState = {
 	seconds: number;
 	isMidiScheduled: boolean;
 	isMidiUpdated: boolean;
+	isLoading: boolean;
+	loadingMessage: string;
 };
 
 const initialState = {
@@ -21,6 +23,8 @@ const initialState = {
 		seconds: 0,
 		isMidiScheduled: false,
 		isMidiUpdated: false,
+		isLoading: false,
+		loadingMessage: '',
 	} as AudioState,
 } as InitialState;
 
@@ -46,6 +50,12 @@ export const audio = createSlice({
 		setIsMidiUpdated: (state, action: PayloadAction<boolean>) => {
 			state.value.isMidiUpdated = action.payload;
 		},
+		setIsLoading: (state, action: PayloadAction<boolean>) => {
+			state.value.isLoading = action.payload;
+		},
+		setLoadingMessage: (state, action: PayloadAction<string>) => {
+			state.value.loadingMessage = action.payload;
+		},
 	},
 });
 
@@ -56,5 +66,7 @@ export const {
 	setSeconds,
 	setIsMidiScheduled,
 	setIsMidiUpdated,
+	setIsLoading,
+	setLoadingMessage,
 } = audio.actions;
 export default audio.reducer;

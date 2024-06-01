@@ -12,7 +12,12 @@ import {
 import { useAppSelector } from '@/redux/store';
 import React, { useEffect } from 'react';
 import * as Tone from 'tone';
-import { setIsPlaying, setSeconds } from '@/redux/features/audioSlice';
+import {
+	setIsLoading,
+	setIsPlaying,
+	setLoadingMessage,
+	setSeconds,
+} from '@/redux/features/audioSlice';
 import { useDispatch } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { COLORS } from '@/app/utils/colors';
@@ -34,16 +39,32 @@ let scheduleRepeaterId: number = -1;
 const MusicMenu = () => {
 	const dispatch = useDispatch();
 	const isPlaying = useAppSelector((state) => state.audioReducer.value.isPlaying);
+	const loadingMessage = useAppSelector(
+		(state) => state.audioReducer.value.loadingMessage
+	);
+	const isLoading = useAppSelector((state) => state.audioReducer.value.isLoading);
 	// const tempo = useAppSelector((state) => state.audioReducer.value.tempo);
 	// const volume = useAppSelector((state) => state.audioReducer.value.volume);
 	const seconds = useAppSelector((state) => state.audioReducer.value.seconds);
 	const canvasSize = useAppSelector((state) => state.windowReducer.value.canvasSize);
 
 	const handleGenerateMusic = (): void => {
+		console.log('laoding ');
+
 		const ctx = getCanvasContext();
 		const imageData: ImageData = ctx.getImageData(0, 0, canvasSize.x, canvasSize.y);
+
+		// dispatch(setLoadingMessage('Parsing note data...'));
+
 		const islands: Island[] = generateMusic(imageData);
+
+		// dispatch(setLoadingMessage('Scheduling midi notes...'));
+
 		scheduleMidi(islands);
+
+		// dispatch(setLoadingMessage('Ready!'));
+		console.log('done');
+		dispatch(setIsLoading(false));
 	};
 
 	useEffect(() => {
@@ -62,7 +83,6 @@ const MusicMenu = () => {
 		gainFunctionRepeaterIds = [];
 
 		const maxSimultaneousVoices: number = calcMaxSimultaneousVoices(islands);
-		// what is max possible gain based on this, then scale the gain of each synth by this factor
 
 		Tone.Transport.cancel();
 		const newSynthCount = maxSimultaneousVoices - synths.length;
@@ -185,7 +205,14 @@ const MusicMenu = () => {
 		<div className="flex flex-row items-center gap-2">
 			<button
 				className="bg-light-pink p-2 text-off-white transition-all hover:animate-color-shift active:scale-95"
-				onClick={handleGenerateMusic}
+				onClick={() => {
+					dispatch(setIsLoading(true));
+					dispatch(setLoadingMessage('Extracting canvas data...'));
+
+					setTimeout(() => {
+						handleGenerateMusic();
+					}, 100);
+				}}
 			>
 				Generate Music
 			</button>
@@ -196,6 +223,10 @@ const MusicMenu = () => {
 			/>
 			<PlaybackButton isActive={!isPlaying} icon={faPlay} handleClick={playAudio} />
 			<PlaybackButton isActive={isPlaying} icon={faPause} handleClick={pauseAudio} />
+			<div className="h-full w-fit" style={{ display: isLoading ? 'block' : 'none' }}>
+				<img className="h-full w-8" src="/blockLoading.svg"></img>
+			</div>
+			<h3 style={{ display: isLoading ? 'block' : 'none' }}>{loadingMessage}</h3>
 		</div>
 	);
 };

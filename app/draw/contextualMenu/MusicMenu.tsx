@@ -69,6 +69,15 @@ const MusicMenu = () => {
 		}
 	}, [isPlaying]);
 
+	const setupPolySynth = () => {
+		const polySynth = new Tone.PolySynth().toDestination();
+		const gainNode = new Tone.Gain(-0.99).toDestination();
+		polySynth.sync();
+		polySynth.connect(gainNode);
+		synths.push(polySynth);
+		gainNodes.push(gainNode);
+	};
+
 	const scheduleMidi = (islands: Island[]): void => {
 		gainFunctionRepeaterIds.forEach((id) => {
 			Tone.Transport.clear(id);
@@ -79,12 +88,7 @@ const MusicMenu = () => {
 
 		const newSynthCount = maxSimultaneousVoices - synths.length;
 		for (let i = 0; i < newSynthCount; i++) {
-			const polySynth = new Tone.PolySynth().toDestination();
-			const gainNode = new Tone.Gain(-0.99).toDestination();
-			polySynth.sync();
-			polySynth.connect(gainNode);
-			synths.push(polySynth);
-			gainNodes.push(gainNode);
+			setupPolySynth();
 		}
 
 		const scheduledRanges: number[][][] = [];

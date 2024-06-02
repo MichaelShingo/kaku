@@ -47,6 +47,8 @@ const lightnessToOctave = (lightness: number): number => {
 };
 
 export const calcMaxSimultaneousVoices = (islands: Island[]): number => {
+	// can you fix this overlapping interval algorithm so it detects when there is a range that cannot be put onto one row?
+
 	let max = 0;
 	let count = 0;
 	const data = [];
@@ -68,7 +70,7 @@ export const calcMaxSimultaneousVoices = (islands: Island[]): number => {
 		max = Math.max(max, count);
 	}
 
-	return max;
+	return max * 2;
 };
 
 export const doesRangeOverlap = (

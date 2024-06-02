@@ -25,7 +25,6 @@ import { Coordinate } from '@/redux/features/windowSlice';
 import PlaybackButton from './PlaybackButton';
 import GenerateMusicButton from './GenerateMusicButton';
 
-// let limiter: Tone.Limiter;
 const synths: Tone.PolySynth[] = [];
 const gainNodes: Tone.Gain[] = [];
 let gainFunctionRepeaterIds: number[] = [];

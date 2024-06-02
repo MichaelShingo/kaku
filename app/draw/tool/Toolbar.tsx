@@ -19,6 +19,7 @@ import {
 import { setColor, setSelectedTool, Tool } from '@/redux/features/toolSlice';
 import { getCanvasContext } from '../../utils/canvasContext';
 import { setCurrentHistoryIndex } from '@/redux/features/windowSlice';
+import { COLORS } from '@/app/utils/colors';
 
 const Toolbar = () => {
 	const dispatch = useDispatch();
@@ -102,18 +103,36 @@ type ToolButtonProps = {
 
 const ToolButton: React.FC<ToolButtonProps> = ({ toolName, icon }) => {
 	const selectedTool = useAppSelector((state) => state.toolReducer.value.selectedTool);
+	const isLoading = useAppSelector((state) => state.audioReducer.value.isLoading);
+	const isPlaying = useAppSelector((state) => state.audioReducer.value.isPlaying);
+
 	const dispatch = useDispatch();
 	const isActive: boolean = toolName === selectedTool;
+	const isDisabled = isLoading || isPlaying;
+
+	const generateIconColor = (): string => {
+		if (isActive) {
+			return COLORS['light-blue'];
+		}
+		if (isDisabled) {
+			return COLORS['light-grey'];
+		} else {
+			return COLORS['off-white'];
+		}
+	};
 
 	return (
 		<button
-			className="h-12 w-16 hover:cursor-pointer"
-			style={{ backgroundColor: isActive ? 'black' : 'transparent' }}
+			className="h-12 w-16"
+			style={{
+				backgroundColor: isActive ? 'black' : 'transparent',
+				cursor: isDisabled ? 'auto' : 'pointer',
+			}}
 			onClick={() => {
-				dispatch(setSelectedTool(toolName));
+				isDisabled ? () => {} : dispatch(setSelectedTool(toolName));
 			}}
 		>
-			<FontAwesomeIcon icon={icon} color={isActive ? '#01baef' : '#fffffc'} />
+			<FontAwesomeIcon icon={icon} color={generateIconColor()} />
 		</button>
 	);
 };
@@ -124,9 +143,25 @@ type FunctionButtonProps = {
 	handleClick: () => void;
 };
 const FunctionButton: React.FC<FunctionButtonProps> = ({ id, icon, handleClick }) => {
+	const isLoading = useAppSelector((state) => state.audioReducer.value.isLoading);
+	const isPlaying = useAppSelector((state) => state.audioReducer.value.isPlaying);
+
+	const isDisabled = isLoading || isPlaying;
 	return (
-		<button id={id} className="h-7 w-7 hover:cursor-pointer" onClick={handleClick}>
-			<FontAwesomeIcon icon={icon} color="#fffffc" />
+		<button
+			id={id}
+			className="h-7 w-7"
+			style={{
+				cursor: isDisabled ? 'default' : 'cursor-pointer',
+			}}
+			onClick={() => {
+				isDisabled ? () => {} : handleClick();
+			}}
+		>
+			<FontAwesomeIcon
+				icon={icon}
+				color={isDisabled ? COLORS['light-grey'] : COLORS['off-white']}
+			/>
 		</button>
 	);
 };

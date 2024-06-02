@@ -1,6 +1,6 @@
 'use client';
 import { getCanvasContext } from '@/app/utils/canvasContext';
-import { generateMusic, Island } from '@/app/utils/pixelAnalysis';
+import { Island } from '@/app/utils/pixelAnalysis';
 import {
 	calcMaxSimultaneousVoices,
 	calcPixelsFromTime,
@@ -13,21 +13,17 @@ import { useAppSelector } from '@/redux/store';
 import React, { useEffect } from 'react';
 import * as Tone from 'tone';
 import {
+	setIsAudioReady,
 	setIsLoading,
 	setIsPlaying,
 	setLoadingMessage,
 	setSeconds,
 } from '@/redux/features/audioSlice';
 import { useDispatch } from 'react-redux';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { COLORS } from '@/app/utils/colors';
-import {
-	faPause,
-	faPlay,
-	faStop,
-	IconDefinition,
-} from '@fortawesome/free-solid-svg-icons';
+import { faPause, faPlay, faStop } from '@fortawesome/free-solid-svg-icons';
 import { Coordinate } from '@/redux/features/windowSlice';
+import PlaybackButton from './PlaybackButton';
+import GenerateMusicButton from './GenerateMusicButton';
 
 // let limiter: Tone.Limiter;
 const synths: Tone.PolySynth[] = [];
@@ -43,6 +39,7 @@ const MusicMenu = () => {
 		(state) => state.audioReducer.value.loadingMessage
 	);
 	const isLoading = useAppSelector((state) => state.audioReducer.value.isLoading);
+	const isAudioReady = useAppSelector((state) => state.audioReducer.value.isAudioReady);
 	// const tempo = useAppSelector((state) => state.audioReducer.value.tempo);
 	// const volume = useAppSelector((state) => state.audioReducer.value.volume);
 	const seconds = useAppSelector((state) => state.audioReducer.value.seconds);
@@ -53,15 +50,15 @@ const MusicMenu = () => {
 		const ctx = getCanvasContext();
 		const imageData: ImageData = ctx.getImageData(0, 0, canvasSize.x, canvasSize.y);
 
-		dispatch(setLoadingMessage('Traversing your pixels...'));
+		dispatch(setLoadingMessage('Generating...'));
 		const worker = new Worker(new URL('/public/workers.ts', import.meta.url));
 		worker.postMessage({ imageData });
-
 		worker.onmessage = function (e) {
 			const { islands } = e.data;
 			scheduleMidi(islands);
 			dispatch(setLoadingMessage(''));
 			dispatch(setIsLoading(false));
+			dispatch(setIsAudioReady(true));
 		};
 	};
 
@@ -77,16 +74,14 @@ const MusicMenu = () => {
 		gainFunctionRepeaterIds.forEach((id) => {
 			Tone.Transport.clear(id);
 		});
-
 		gainFunctionRepeaterIds = [];
-
 		const maxSimultaneousVoices: number = calcMaxSimultaneousVoices(islands);
-
 		Tone.Transport.cancel();
+
 		const newSynthCount = maxSimultaneousVoices - synths.length;
 		for (let i = 0; i < newSynthCount; i++) {
 			const polySynth = new Tone.PolySynth().toDestination();
-			const gainNode = new Tone.Gain(1).toDestination();
+			const gainNode = new Tone.Gain(-0.99).toDestination();
 			polySynth.sync();
 			polySynth.connect(gainNode);
 			synths.push(polySynth);
@@ -134,13 +129,13 @@ const MusicMenu = () => {
 				const slope = (point2.y - point1.y) / (point2.x - point1.x);
 				const estimatedHeightPixels: number =
 					slope * pixelX - slope * point1.x + point1.y;
-				const gainRange = 2 / maxSimultaneousVoices;
+				const gainRange = 1.98 / maxSimultaneousVoices;
 				const volume = mapRange(
 					estimatedHeightPixels,
 					0,
 					canvasSize.y,
-					-1,
-					-1 + gainRange
+					-0.99,
+					-0.99 + gainRange
 				);
 				if (volume) {
 					gainNodes[island.synthIndex].gain.value = volume;
@@ -151,16 +146,13 @@ const MusicMenu = () => {
 				() => {
 					calcGainAtTime(Tone.Transport.seconds);
 				},
-				0.1,
+				0.05,
 				startTime,
 				duration
 			);
 
 			gainFunctionRepeaterIds.push(gainFunctionRepeaterId);
 		});
-		// console.log(synths);
-		// console.log(gainNodes);
-		// console.log(gainFunctions);
 	};
 
 	const stopAudio = () => {
@@ -201,18 +193,20 @@ const MusicMenu = () => {
 
 	return (
 		<div className="flex flex-row items-center gap-2">
-			<button
-				className="bg-light-pink p-2 text-off-white transition-all hover:animate-color-shift active:scale-95"
-				onClick={handleGenerateMusic}
-			>
-				Generate Music
-			</button>
+			<GenerateMusicButton
+				isActive={!isLoading && !isAudioReady && !isPlaying}
+				handleClick={handleGenerateMusic}
+			/>
 			<PlaybackButton
 				isActive={isPlaying || seconds > 0}
 				icon={faStop}
 				handleClick={stopAudio}
 			/>
-			<PlaybackButton isActive={!isPlaying} icon={faPlay} handleClick={playAudio} />
+			<PlaybackButton
+				isActive={!isLoading && isAudioReady && !isPlaying}
+				icon={faPlay}
+				handleClick={playAudio}
+			/>
 			<PlaybackButton isActive={isPlaying} icon={faPause} handleClick={pauseAudio} />
 			<div className="h-full w-fit" style={{ display: isLoading ? 'block' : 'none' }}>
 				<img className="h-full w-8" src="/blockLoading.svg"></img>
@@ -221,28 +215,4 @@ const MusicMenu = () => {
 		</div>
 	);
 };
-
-interface PlaybackButtonProps {
-	isActive: boolean;
-	icon: IconDefinition;
-	handleClick: () => void;
-}
-const PlaybackButton: React.FC<PlaybackButtonProps> = ({
-	isActive,
-	icon,
-	handleClick,
-}) => {
-	return (
-		<>
-			<button className="h-10 w-10 hover:cursor-pointer" onClick={handleClick}>
-				<FontAwesomeIcon
-					size="lg"
-					icon={icon}
-					color={isActive ? COLORS['light-pink'] : 'grey'}
-				/>
-			</button>
-		</>
-	);
-};
-
 export default MusicMenu;

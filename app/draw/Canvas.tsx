@@ -10,6 +10,7 @@ import {
 	setIsCursorInCanvas,
 } from '@/redux/features/windowSlice';
 import { Shape } from '@/redux/features/toolSlice';
+import { setIsAudioReady } from '@/redux/features/audioSlice';
 
 function App() {
 	const dispatch = useDispatch();
@@ -214,6 +215,7 @@ function App() {
 					onMouseUp={(e) => {
 						drawShape(e);
 						stopDrawing();
+						dispatch(setIsAudioReady(false));
 					}}
 					onClick={handleClick}
 					style={{

@@ -20,6 +20,7 @@ import { setColor, setSelectedTool, Tool } from '@/redux/features/toolSlice';
 import { getCanvasContext } from '../../utils/canvasContext';
 import { setCurrentHistoryIndex } from '@/redux/features/windowSlice';
 import { COLORS } from '@/app/utils/colors';
+import { setIsAudioReady } from '@/redux/features/audioSlice';
 
 const Toolbar = () => {
 	const dispatch = useDispatch();
@@ -38,6 +39,7 @@ const Toolbar = () => {
 		if (currentHistoryIndex === 0) {
 			return;
 		}
+		dispatch(setIsAudioReady(false));
 		const ctx: CanvasRenderingContext2D = getCanvasContext();
 		const canvasImage: HTMLImageElement = new Image();
 		canvasImage.src = canvasHistory[currentHistoryIndex - 1];
@@ -51,6 +53,7 @@ const Toolbar = () => {
 		if (currentHistoryIndex >= canvasHistory.length - 1) {
 			return;
 		}
+		dispatch(setIsAudioReady(false));
 		const ctx: CanvasRenderingContext2D = getCanvasContext();
 		const canvasImage: HTMLImageElement = new Image();
 		canvasImage.src = canvasHistory[currentHistoryIndex + 1];
@@ -152,7 +155,7 @@ const FunctionButton: React.FC<FunctionButtonProps> = ({ id, icon, handleClick }
 			id={id}
 			className="h-7 w-7"
 			style={{
-				cursor: isDisabled ? 'default' : 'cursor-pointer',
+				cursor: isDisabled ? 'default' : 'pointer',
 			}}
 			onClick={() => {
 				isDisabled ? () => {} : handleClick();

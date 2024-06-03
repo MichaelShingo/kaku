@@ -18,12 +18,13 @@ function App() {
 	const canvasContainerRef = useRef<HTMLDivElement>(null);
 	const color = useAppSelector((state) => state.toolReducer.value.color);
 	const brushSize = useAppSelector((state) => state.toolReducer.value.brushSize);
-	const brushOpacity: number = useAppSelector(
-		(state) => state.toolReducer.value.brushOpacity
-	);
 	const canvasSize = useAppSelector((state) => state.windowReducer.value.canvasSize);
+	const isMouseDown = useAppSelector((state) => state.windowReducer.value.isMouseDown);
 	const selectedTool = useAppSelector((state) => state.toolReducer.value.selectedTool);
 	const canvasZoom = useAppSelector((state) => state.windowReducer.value.canvasZoom);
+	const isCursorInCanvas = useAppSelector(
+		(state) => state.windowReducer.value.isCursorInCanvas
+	);
 	const selectedShape: Shape = useAppSelector(
 		(state) => state.toolReducer.value.selectedShape
 	);
@@ -32,7 +33,9 @@ function App() {
 	const [canvasCTX, setCanvasCTX] = useState<CanvasRenderingContext2D | null>(null);
 	const [boundingRect, setBoundingRect] = useState<DOMRect | null>(null);
 	const [initialPosition, setInitialPosition] = useState<Coordinate>({ x: 0, y: 0 });
-	const isDrawingTool = selectedTool === 'eraser' || selectedTool === 'brush';
+	const isBrushTypeTool = selectedTool === 'eraser' || selectedTool === 'brush';
+	const isDrawingTool =
+		selectedTool === 'eraser' || selectedTool === 'brush' || selectedTool === 'shape';
 
 	useEffect(() => {
 		const canvas = canvasRef.current;
@@ -55,6 +58,19 @@ function App() {
 		}
 	}, [canvasSize, canvasZoom]);
 
+	useEffect(() => {
+		if (!isMouseDown) {
+			stopDrawing();
+			if (
+				selectedTool === 'eraser' ||
+				selectedTool === 'brush' ||
+				selectedTool === 'shape'
+			) {
+				dispatch(setIsAudioReady(false));
+			}
+		}
+	}, [isMouseDown]);
+
 	const addToHistory = () => {
 		if (canvasRef.current) {
 			const canvasData: string = canvasRef.current.toDataURL();
@@ -66,6 +82,7 @@ function App() {
 		if (selectedTool !== 'shape') {
 			return;
 		}
+		console.log('draw shape');
 
 		const ctx = canvasCTX;
 		const canvasContainer = canvasContainerRef.current;
@@ -86,8 +103,15 @@ function App() {
 					);
 					break;
 				case 'circle': {
-					const radiusX = (finalPosition.x - initialPosition.x) / 2;
-					const radiusY = (finalPosition.y - initialPosition.y) / 2;
+					let radiusX = (finalPosition.x - initialPosition.x) / 2;
+					let radiusY = (finalPosition.y - initialPosition.y) / 2;
+					if (radiusX < 0) {
+						// this calculation must be adjusted
+						radiusX = (initialPosition.x - finalPosition.x) / 2;
+					}
+					if (radiusY < 0) {
+						radiusY = (initialPosition.y - finalPosition.y) / 2;
+					}
 					const ellipseCenter: Coordinate = {
 						x: finalPosition.x - radiusX,
 						y: finalPosition.y - radiusY,
@@ -115,6 +139,7 @@ function App() {
 					);
 					ctx.lineTo(finalPosition.x, finalPosition.y);
 					ctx.fill();
+					stopDrawing();
 					break;
 				}
 				default:
@@ -125,9 +150,11 @@ function App() {
 	};
 
 	const startDrawing = (e: React.MouseEvent) => {
-		if (!isDrawingTool) {
+		if (!isBrushTypeTool) {
 			return;
 		}
+		console.log('start drawing');
+
 		setIsDrawing(true);
 		if (canvasCTX && boundingRect) {
 			canvasCTX.strokeStyle = selectedTool === 'brush' ? color : '#ffffff';
@@ -145,7 +172,7 @@ function App() {
 
 	const draw = (e: React.MouseEvent) => {
 		const isLeftMouseButton = e.buttons === 1;
-		if (!isDrawing || !isLeftMouseButton || !isDrawingTool) {
+		if (!isDrawing || !isLeftMouseButton || !isBrushTypeTool) {
 			return;
 		}
 
@@ -163,6 +190,8 @@ function App() {
 		if (!isDrawingTool) {
 			return;
 		}
+		console.log('stop drawing');
+
 		setIsDrawing(false);
 		canvasCTX?.beginPath();
 		addToHistory();
@@ -199,10 +228,12 @@ function App() {
 					id="canvas"
 					className="border-[3px] border-off-black"
 					ref={canvasRef}
-					onMouseEnter={(e) => {
+					onMouseEnter={() => {
 						dispatch(setIsCursorInCanvas(true));
 					}}
-					onMouseLeave={() => dispatch(setIsCursorInCanvas(false))}
+					onMouseLeave={() => {
+						dispatch(setIsCursorInCanvas(false));
+					}}
 					onMouseMove={(e) => {
 						draw(e);
 					}}
@@ -214,8 +245,6 @@ function App() {
 					}}
 					onMouseUp={(e) => {
 						drawShape(e);
-						stopDrawing();
-						dispatch(setIsAudioReady(false));
 					}}
 					onClick={handleClick}
 					style={{

@@ -16,7 +16,7 @@ const GenerateMusicButton: React.FC<GenerateMusicButtonProps> = ({
 			} active:${isActive ? 'scale-95' : 'scale-100'}`}
 			style={{
 				cursor: isActive ? 'pointer' : 'auto',
-				backgroundColor: isActive ? COLORS['light-pink'] : COLORS['off-black'],
+				backgroundColor: isActive ? COLORS['light-pink'] : COLORS['light-grey'],
 			}}
 			onClick={() => {
 				isActive ? handleClick() : () => {};

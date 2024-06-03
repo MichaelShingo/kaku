@@ -40,13 +40,14 @@ function App() {
 	useEffect(() => {
 		const canvas = canvasRef.current;
 		if (canvas) {
-			const ctx = canvas.getContext('2d');
+			const ctx = canvas.getContext('2d', { alpha: false });
 			canvas.width = canvasSize.x;
 			canvas.height = canvasSize.y;
 			setCanvasCTX(ctx);
 			if (ctx) {
 				ctx.fillStyle = 'white';
 				ctx.fillRect(0, 0, canvasSize.x, canvasSize.y);
+				ctx.imageSmoothingEnabled = true;
 			}
 		}
 		addToHistory();
@@ -58,18 +59,18 @@ function App() {
 		}
 	}, [canvasSize, canvasZoom]);
 
-	useEffect(() => {
-		if (!isMouseDown) {
-			stopDrawing();
-			if (
-				selectedTool === 'eraser' ||
-				selectedTool === 'brush' ||
-				selectedTool === 'shape'
-			) {
-				dispatch(setIsAudioReady(false));
-			}
-		}
-	}, [isMouseDown]);
+	// useEffect(() => {
+	// 	if (!isMouseDown) {
+	// 		stopDrawing();
+	// 		if (
+	// 			selectedTool === 'eraser' ||
+	// 			selectedTool === 'brush' ||
+	// 			selectedTool === 'shape'
+	// 		) {
+	// 			dispatch(setIsAudioReady(false));
+	// 		}
+	// 	}
+	// }, [isMouseDown]);
 
 	const addToHistory = () => {
 		if (canvasRef.current) {
@@ -222,8 +223,19 @@ function App() {
 		return { x: 0, y: 0 };
 	};
 	return (
-		<div className="flex h-full w-full items-center justify-center overflow-x-scroll overflow-y-scroll">
-			<div ref={canvasContainerRef} className="h-fit w-fit cursor-none">
+		<div
+			className="flex h-full w-full items-center justify-center overflow-x-scroll overflow-y-scroll"
+			// onMouseUp={(e) => {
+			// 	stopDrawing();
+			// }}
+		>
+			<div
+				ref={canvasContainerRef}
+				className="h-fit w-fit cursor-none"
+				// onMouseUp={(e) => {
+				// 	stopDrawing();
+				// }}
+			>
 				<canvas
 					id="canvas"
 					className="border-[3px] border-off-black"
@@ -245,6 +257,14 @@ function App() {
 					}}
 					onMouseUp={(e) => {
 						drawShape(e);
+						stopDrawing();
+						if (
+							selectedTool === 'eraser' ||
+							selectedTool === 'brush' ||
+							selectedTool === 'shape'
+						) {
+							dispatch(setIsAudioReady(false));
+						}
 					}}
 					onClick={handleClick}
 					style={{

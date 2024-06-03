@@ -36,6 +36,7 @@ const Toolbar = () => {
 	);
 
 	const undo = () => {
+		console.log(currentHistoryIndex);
 		if (currentHistoryIndex === 0) {
 			return;
 		}
@@ -72,7 +73,10 @@ const Toolbar = () => {
 	};
 
 	return (
-		<div className="absolute left-0 top-0 z-10 flex h-[100vh] w-14 flex-col items-center justify-center overflow-hidden bg-off-black">
+		<div
+			className="absolute left-0 top-0 z-10 flex h-[100vh] w-14 flex-col items-center justify-center overflow-hidden bg-off-black"
+			onClick={(e) => e.stopPropagation()}
+		>
 			<div className="flex h-[85%] flex-col items-center justify-evenly">
 				<ToolButton icon={faPaintBrush} toolName="brush" />
 				<ToolButton icon={faShapes} toolName="shape" />

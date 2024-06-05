@@ -36,7 +36,6 @@ const Toolbar = () => {
 	);
 
 	const undo = () => {
-		console.log(currentHistoryIndex);
 		if (currentHistoryIndex === 0) {
 			return;
 		}

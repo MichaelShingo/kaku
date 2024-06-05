@@ -3,7 +3,7 @@ import { getCanvasContext } from '@/app/utils/canvasContext';
 import { Island } from '@/app/utils/pixelAnalysis';
 import {
 	calcMaxSimultaneousVoices,
-	calcPixelsFromTime,
+	calcPixelsFromSeconds,
 	calcSecondsFromPixels,
 	doesRangeOverlap,
 	hlToFrequency,
@@ -119,7 +119,7 @@ const MusicMenu = () => {
 			}
 
 			const calcGainAtTime = (time: number): void => {
-				const pixelX = calcPixelsFromTime(time);
+				const pixelX = calcPixelsFromSeconds(time);
 				const point1: Coordinate = {
 					x: Math.floor(pixelX),
 					y: island.colCounts[Math.floor(pixelX)],

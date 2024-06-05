@@ -6,7 +6,7 @@ export const calcSecondsFromPixels = (colRange: number): number => {
 	return colRange / PIXELS_PER_SECOND;
 };
 
-export const calcPixelsFromTime = (seconds: number): number => {
+export const calcPixelsFromSeconds = (seconds: number): number => {
 	return seconds * PIXELS_PER_SECOND;
 };
 

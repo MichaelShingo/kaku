@@ -11,6 +11,7 @@ import {
 } from '@/redux/features/windowSlice';
 import { Shape } from '@/redux/features/toolSlice';
 import { setIsAudioReady } from '@/redux/features/audioSlice';
+import PlaybackCanvas from './PlaybackCanvas';
 
 function App() {
 	const dispatch = useDispatch();
@@ -223,19 +224,9 @@ function App() {
 		return { x: 0, y: 0 };
 	};
 	return (
-		<div
-			className="flex h-full w-full items-center justify-center overflow-x-scroll overflow-y-scroll"
-			// onMouseUp={(e) => {
-			// 	stopDrawing();
-			// }}
-		>
-			<div
-				ref={canvasContainerRef}
-				className="h-fit w-fit cursor-none"
-				// onMouseUp={(e) => {
-				// 	stopDrawing();
-				// }}
-			>
+		<div className="flex h-full w-full items-center justify-center overflow-x-scroll overflow-y-scroll">
+			<div ref={canvasContainerRef} className="h-fit w-fit cursor-none">
+				<PlaybackCanvas />
 				<canvas
 					id="canvas"
 					className="border-[3px] border-off-black"
@@ -258,11 +249,7 @@ function App() {
 					onMouseUp={(e) => {
 						drawShape(e);
 						stopDrawing();
-						if (
-							selectedTool === 'eraser' ||
-							selectedTool === 'brush' ||
-							selectedTool === 'shape'
-						) {
+						if (isDrawingTool) {
 							dispatch(setIsAudioReady(false));
 						}
 					}}

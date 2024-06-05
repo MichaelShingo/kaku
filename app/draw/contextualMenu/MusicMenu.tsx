@@ -180,8 +180,10 @@ const MusicMenu = () => {
 		dispatch(setIsPlaying(true));
 
 		scheduleRepeaterId = Tone.Transport.scheduleRepeat(
-			() =>
-				checkIsEndofAudio(Tone.Transport.seconds, calcSecondsFromPixels(canvasSize.x)),
+			() => {
+				console.log(Tone.Transport.seconds);
+				checkIsEndofAudio(Tone.Transport.seconds, calcSecondsFromPixels(canvasSize.x));
+			},
 			0.3,
 			0
 		);

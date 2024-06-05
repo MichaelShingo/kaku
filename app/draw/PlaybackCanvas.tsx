@@ -10,7 +10,22 @@ const PlaybackCanvas = () => {
 		(state) => state.windowReducer.value.canvasSize
 	);
 	const isPlaying = useAppSelector((state) => state.audioReducer.value.isPlaying);
+	const seconds = useAppSelector((state) => state.audioReducer.value.seconds);
 	const [canvasCTX, setCanvasCTX] = useState<CanvasRenderingContext2D | null>(null);
+
+	const clearCanvas = () => {
+		if (!canvasCTX) {
+			return;
+		}
+		canvasCTX.clearRect(0, 0, canvasSize.x, canvasSize.y);
+	};
+	const drawPlaybackLine = (seconds: number): void => {
+		if (!canvasCTX) {
+			return;
+		}
+		const x = calcPixelsFromSeconds(seconds);
+		canvasCTX.fillRect(x - 3, 0, 2, canvasSize.y);
+	};
 
 	useEffect(() => {
 		const canvas = playbackCanvasRef.current;
@@ -23,12 +38,8 @@ const PlaybackCanvas = () => {
 	}, [playbackCanvasRef]);
 
 	const animatePlaybackLine = () => {
-		if (!canvasCTX) {
-			return;
-		}
-		canvasCTX.clearRect(0, 0, canvasSize.x, canvasSize.y);
-		const x = calcPixelsFromSeconds(Tone.Transport.seconds);
-		canvasCTX.fillRect(x - 3, 0, 2, canvasSize.y);
+		clearCanvas();
+		drawPlaybackLine(Tone.Transport.seconds);
 		window.requestAnimationFrame(animatePlaybackLine);
 	};
 
@@ -37,6 +48,12 @@ const PlaybackCanvas = () => {
 			animatePlaybackLine();
 		}
 	}, [isPlaying]);
+
+	useEffect(() => {
+		console.log(seconds);
+		clearCanvas();
+		drawPlaybackLine(seconds);
+	}, [seconds]);
 
 	return (
 		<canvas

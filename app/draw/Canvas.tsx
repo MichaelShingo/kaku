@@ -10,8 +10,9 @@ import {
 	setIsCursorInCanvas,
 } from '@/redux/features/windowSlice';
 import { Shape } from '@/redux/features/toolSlice';
-import { setIsAudioReady } from '@/redux/features/audioSlice';
+import { setIsAudioReady, setSeconds } from '@/redux/features/audioSlice';
 import PlaybackCanvas from './PlaybackCanvas';
+import { calcSecondsFromPixels } from '../utils/pixelToAudioConversion';
 
 function App() {
 	const dispatch = useDispatch();
@@ -199,14 +200,22 @@ function App() {
 		addToHistory();
 	};
 
-	const handleClick = (): void => {
+	const handleClick = (e: React.MouseEvent): void => {
 		switch (selectedTool) {
 			case 'zoomIn':
 				dispatch(incrementCanvasZoom());
-				return;
+				break;
 			case 'zoomOut':
 				dispatch(decrementCanvasZoom());
-				return;
+				break;
+			case 'music': {
+				const offsetMousePosition = calculateMousePositionOffset({
+					x: e.clientX,
+					y: e.clientY,
+				});
+				dispatch(setSeconds(calcSecondsFromPixels(offsetMousePosition.x)));
+				break;
+			}
 			case 'brush':
 			case 'shape':
 			case 'eraser':

@@ -233,8 +233,11 @@ function App() {
 		return { x: 0, y: 0 };
 	};
 	return (
-		<div className="flex h-full w-full items-center justify-center overflow-x-scroll overflow-y-scroll">
-			<div ref={canvasContainerRef} className="h-fit w-fit cursor-none">
+		<div className="mb-20 ml-16 mr-20 mt-14 flex h-full w-full items-center justify-center">
+			<div
+				ref={canvasContainerRef}
+				className="mb-48 mr-20 mt-32 h-[90%] w-fit cursor-none overflow-x-scroll overflow-y-scroll"
+			>
 				<PlaybackCanvas />
 				<canvas
 					id="canvas"

@@ -5,6 +5,7 @@ import * as Tone from 'tone';
 import { calcPixelsFromSeconds } from '../utils/pixelToAudioConversion';
 
 let isPlayingLocal: boolean = false;
+
 const PlaybackCanvas = () => {
 	const playbackCanvasRef = useRef<HTMLCanvasElement | null>(null);
 	const canvasSize: Coordinate = useAppSelector(

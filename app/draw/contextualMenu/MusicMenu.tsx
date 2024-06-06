@@ -39,8 +39,6 @@ const MusicMenu = () => {
 	);
 	const isLoading = useAppSelector((state) => state.audioReducer.value.isLoading);
 	const isAudioReady = useAppSelector((state) => state.audioReducer.value.isAudioReady);
-	// const tempo = useAppSelector((state) => state.audioReducer.value.tempo);
-	// const volume = useAppSelector((state) => state.audioReducer.value.volume);
 	const seconds = useAppSelector((state) => state.audioReducer.value.seconds);
 	const canvasSize = useAppSelector((state) => state.windowReducer.value.canvasSize);
 
@@ -176,12 +174,11 @@ const MusicMenu = () => {
 
 		const startTime: number = seconds;
 		Tone.Transport.seconds = startTime;
-		Tone.Transport.start(); // must adjust this for pausing function
+		Tone.Transport.start();
 		dispatch(setIsPlaying(true));
 
 		scheduleRepeaterId = Tone.Transport.scheduleRepeat(
 			() => {
-				console.log(Tone.Transport.seconds);
 				checkIsEndofAudio(Tone.Transport.seconds, calcSecondsFromPixels(canvasSize.x));
 			},
 			0.3,

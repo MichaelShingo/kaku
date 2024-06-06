@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import * as Tone from 'tone';
 import { calcPixelsFromSeconds } from '../utils/pixelToAudioConversion';
 
+let isPlayingLocal: boolean = false;
 const PlaybackCanvas = () => {
 	const playbackCanvasRef = useRef<HTMLCanvasElement | null>(null);
 	const canvasSize: Coordinate = useAppSelector(
@@ -37,20 +38,24 @@ const PlaybackCanvas = () => {
 		}
 	}, [playbackCanvasRef]);
 
-	const animatePlaybackLine = () => {
-		clearCanvas();
-		drawPlaybackLine(Tone.Transport.seconds);
-		window.requestAnimationFrame(animatePlaybackLine);
-	};
-
 	useEffect(() => {
+		const animatePlaybackLine = () => {
+			clearCanvas();
+			drawPlaybackLine(Tone.Transport.seconds);
+			if (isPlayingLocal) {
+				window.requestAnimationFrame(animatePlaybackLine);
+			}
+		};
+
 		if (isPlaying) {
-			animatePlaybackLine();
+			isPlayingLocal = true;
+			window.requestAnimationFrame(animatePlaybackLine);
+		} else {
+			isPlayingLocal = false;
 		}
 	}, [isPlaying]);
 
 	useEffect(() => {
-		console.log(seconds);
 		clearCanvas();
 		drawPlaybackLine(seconds);
 	}, [seconds]);

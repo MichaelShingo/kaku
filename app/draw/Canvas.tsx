@@ -214,11 +214,14 @@ function App() {
 				dispatch(decrementCanvasZoom());
 				break;
 			case 'music': {
-				console.log(e.clientX, canvasScroll.x);
 				if (!boundingRect) {
 					return;
 				}
-				dispatch(setSeconds(calcSecondsFromPixels(e.clientX - boundingRect.left)));
+				dispatch(
+					setSeconds(
+						calcSecondsFromPixels(e.clientX - boundingRect.left + canvasScroll.x)
+					)
+				);
 				break;
 			}
 			case 'brush':

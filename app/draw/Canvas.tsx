@@ -1,5 +1,5 @@
 'use client';
-import React, { use, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAppSelector } from '@/redux/store';
 import { useDispatch } from 'react-redux';
 import {
@@ -17,11 +17,13 @@ import { calcSecondsFromPixels } from '../utils/pixelToAudioConversion';
 
 function App() {
 	const dispatch = useDispatch();
+
 	const [isDrawing, setIsDrawing] = useState<boolean>(false);
 	const canvasContainerRef = useRef<HTMLDivElement>(null);
 	const color = useAppSelector((state) => state.toolReducer.value.color);
 	const brushSize = useAppSelector((state) => state.toolReducer.value.brushSize);
 	const canvasSize = useAppSelector((state) => state.windowReducer.value.canvasSize);
+	const windowWidth = useAppSelector((state) => state.windowReducer.value.windowWidth);
 	const isMouseDown = useAppSelector((state) => state.windowReducer.value.isMouseDown);
 	const selectedTool = useAppSelector((state) => state.toolReducer.value.selectedTool);
 	const canvasZoom = useAppSelector((state) => state.windowReducer.value.canvasZoom);
@@ -59,22 +61,10 @@ function App() {
 
 	useEffect(() => {
 		if (canvasContainerRef.current) {
+			console.log('setting bounding rect, window change');
 			setBoundingRect(canvasContainerRef.current.getBoundingClientRect());
 		}
-	}, [canvasSize, canvasZoom]);
-
-	// useEffect(() => {
-	// 	if (!isMouseDown) {
-	// 		stopDrawing();
-	// 		if (
-	// 			selectedTool === 'eraser' ||
-	// 			selectedTool === 'brush' ||
-	// 			selectedTool === 'shape'
-	// 		) {
-	// 			dispatch(setIsAudioReady(false));
-	// 		}
-	// 	}
-	// }, [isMouseDown]);
+	}, [canvasSize, canvasZoom, windowWidth]);
 
 	const addToHistory = () => {
 		if (canvasRef.current) {
@@ -166,9 +156,15 @@ function App() {
 			canvasCTX.lineWidth = brushSize;
 			canvasCTX.lineCap = 'round';
 			canvasCTX.lineJoin = 'round';
+
+			console.log(e.clientX, e.clientY);
+			const offsetMousePosition: Coordinate = calculateMousePositionOffset({
+				x: e.clientX,
+				y: e.clientY,
+			});
 			canvasCTX.lineTo(
-				e.clientX - boundingRect.left - 2 + canvasScroll.x,
-				e.clientY - boundingRect.top - 2 + canvasScroll.y
+				offsetMousePosition.x - 2 + canvasScroll.x,
+				offsetMousePosition.y - 2 + canvasScroll.y
 			);
 			canvasCTX.stroke();
 		}
@@ -186,9 +182,14 @@ function App() {
 			canvasCTX && canvasContainer && boundingRect && canvasRef.current;
 
 		if (areObjectsAvailable) {
+			const offsetMousePosition: Coordinate = calculateMousePositionOffset({
+				x: e.clientX,
+				y: e.clientY,
+			});
+
 			canvasCTX.lineTo(
-				e.clientX - boundingRect.left - 2 + canvasScroll.x,
-				e.clientY - boundingRect.top - 2 + canvasScroll.y
+				offsetMousePosition.x - 2 + canvasScroll.x,
+				offsetMousePosition.y - 2 + canvasScroll.y
 			);
 			canvasCTX.stroke();
 		}
@@ -241,10 +242,6 @@ function App() {
 		return { x: 0, y: 0 };
 	};
 
-	useEffect(() => {
-		console.log(canvasScroll);
-	});
-
 	const handleScroll = () => {
 		if (canvasContainerRef.current) {
 			dispatch(
@@ -260,12 +257,12 @@ function App() {
 			<div
 				ref={canvasContainerRef}
 				onScroll={handleScroll}
-				className="relative mb-48 mr-20 mt-32 h-[90%] w-fit cursor-none overflow-x-auto overflow-y-auto"
+				className="relative mb-48 mr-20 mt-32 h-[90%] w-fit overflow-x-auto overflow-y-auto"
 			>
 				<PlaybackCanvas />
 				<canvas
 					id="canvas"
-					className="border-[3px] border-off-black"
+					className="cursor-none border-[3px] border-off-black"
 					ref={canvasRef}
 					onMouseEnter={() => {
 						dispatch(setIsCursorInCanvas(true));

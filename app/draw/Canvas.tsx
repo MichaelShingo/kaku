@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { use, useEffect, useRef, useState } from 'react';
 import { useAppSelector } from '@/redux/store';
 import { useDispatch } from 'react-redux';
 import {
@@ -8,6 +8,7 @@ import {
 	incrementCanvasZoom,
 	Coordinate,
 	setIsCursorInCanvas,
+	setCanvasScroll,
 } from '@/redux/features/windowSlice';
 import { Shape } from '@/redux/features/toolSlice';
 import { setIsAudioReady, setSeconds } from '@/redux/features/audioSlice';
@@ -24,6 +25,7 @@ function App() {
 	const isMouseDown = useAppSelector((state) => state.windowReducer.value.isMouseDown);
 	const selectedTool = useAppSelector((state) => state.toolReducer.value.selectedTool);
 	const canvasZoom = useAppSelector((state) => state.windowReducer.value.canvasZoom);
+	const canvasScroll = useAppSelector((state) => state.windowReducer.value.canvasScroll);
 	const isCursorInCanvas = useAppSelector(
 		(state) => state.windowReducer.value.isCursorInCanvas
 	);
@@ -165,8 +167,8 @@ function App() {
 			canvasCTX.lineCap = 'round';
 			canvasCTX.lineJoin = 'round';
 			canvasCTX.lineTo(
-				e.clientX - boundingRect.left - 2,
-				e.clientY - boundingRect.top - 2
+				e.clientX - boundingRect.left - 2 + canvasScroll.x,
+				e.clientY - boundingRect.top - 2 + canvasScroll.y
 			);
 			canvasCTX.stroke();
 		}
@@ -184,7 +186,10 @@ function App() {
 			canvasCTX && canvasContainer && boundingRect && canvasRef.current;
 
 		if (areObjectsAvailable) {
-			canvasCTX.lineTo(e.clientX - boundingRect.left, e.clientY - boundingRect.top);
+			canvasCTX.lineTo(
+				e.clientX - boundingRect.left - 2 + canvasScroll.x,
+				e.clientY - boundingRect.top - 2 + canvasScroll.y
+			);
 			canvasCTX.stroke();
 		}
 	};
@@ -209,11 +214,11 @@ function App() {
 				dispatch(decrementCanvasZoom());
 				break;
 			case 'music': {
-				const offsetMousePosition = calculateMousePositionOffset({
-					x: e.clientX,
-					y: e.clientY,
-				});
-				dispatch(setSeconds(calcSecondsFromPixels(offsetMousePosition.x)));
+				console.log(e.clientX, canvasScroll.x);
+				if (!boundingRect) {
+					return;
+				}
+				dispatch(setSeconds(calcSecondsFromPixels(e.clientX - boundingRect.left)));
 				break;
 			}
 			case 'brush':
@@ -232,11 +237,27 @@ function App() {
 		}
 		return { x: 0, y: 0 };
 	};
+
+	useEffect(() => {
+		console.log(canvasScroll);
+	});
+
+	const handleScroll = () => {
+		if (canvasContainerRef.current) {
+			dispatch(
+				setCanvasScroll({
+					x: canvasContainerRef.current.scrollLeft,
+					y: canvasContainerRef.current.scrollTop,
+				})
+			);
+		}
+	};
 	return (
 		<div className="mb-20 ml-16 mr-20 mt-14 flex h-full w-full items-center justify-center">
 			<div
 				ref={canvasContainerRef}
-				className="mb-48 mr-20 mt-32 h-[90%] w-fit cursor-none overflow-x-scroll overflow-y-scroll"
+				onScroll={handleScroll}
+				className="relative mb-48 mr-20 mt-32 h-[90%] w-fit cursor-none overflow-x-auto overflow-y-auto"
 			>
 				<PlaybackCanvas />
 				<canvas

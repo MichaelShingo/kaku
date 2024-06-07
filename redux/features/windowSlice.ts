@@ -24,6 +24,7 @@ type WindowState = {
 	isCursorInCanvas: boolean;
 	canvasHistory: string[];
 	currentHistoryIndex: number;
+	canvasScroll: Coordinate;
 };
 
 const initialState = {
@@ -33,12 +34,13 @@ const initialState = {
 		windowWidth: 0,
 		mousePosition: { x: 0, y: 0 },
 		isDragging: false,
-		canvasSize: { x: 300, y: 1000 },
+		canvasSize: { x: 2000, y: 250 },
 		canvasZoom: 100,
 		isMouseDown: false,
 		isCursorInCanvas: false,
 		canvasHistory: [],
 		currentHistoryIndex: -1,
+		canvasScroll: { x: 0, y: 0 },
 	} as WindowState,
 } as InitialState;
 
@@ -95,6 +97,9 @@ export const window = createSlice({
 		setCurrentHistoryIndex: (state, action: PayloadAction<number>) => {
 			state.value.currentHistoryIndex = action.payload;
 		},
+		setCanvasScroll: (state, action: PayloadAction<Coordinate>) => {
+			state.value.canvasScroll = action.payload;
+		},
 	},
 });
 
@@ -111,5 +116,6 @@ export const {
 	setIsCursorInCanvas,
 	appendCanvasHistory,
 	setCurrentHistoryIndex,
+	setCanvasScroll,
 } = window.actions;
 export default window.reducer;

@@ -11,6 +11,9 @@ const PlaybackCanvas = () => {
 	const canvasSize: Coordinate = useAppSelector(
 		(state) => state.windowReducer.value.canvasSize
 	);
+	const canvasScroll: Coordinate = useAppSelector(
+		(state) => state.windowReducer.value.canvasScroll
+	);
 	const isPlaying = useAppSelector((state) => state.audioReducer.value.isPlaying);
 	const seconds = useAppSelector((state) => state.audioReducer.value.seconds);
 	const [canvasCTX, setCanvasCTX] = useState<CanvasRenderingContext2D | null>(null);
@@ -25,7 +28,7 @@ const PlaybackCanvas = () => {
 		if (!canvasCTX) {
 			return;
 		}
-		const x = calcPixelsFromSeconds(seconds);
+		const x = calcPixelsFromSeconds(seconds) + canvasScroll.x;
 		canvasCTX.fillRect(x - 3, 0, 2, canvasSize.y);
 	};
 
@@ -64,7 +67,7 @@ const PlaybackCanvas = () => {
 	return (
 		<canvas
 			id="playback-canvas"
-			className="pointer-events-none absolute z-50 border-[3px] border-transparent"
+			className="pointer-events-none absolute inset-0 z-50 border-[3px] border-transparent"
 			ref={playbackCanvasRef}
 		></canvas>
 	);

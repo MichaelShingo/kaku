@@ -218,10 +218,12 @@ function App() {
 				if (!boundingRect) {
 					return;
 				}
+				const offsetMousePosition: Coordinate = calculateMousePositionOffset({
+					x: e.clientX,
+					y: e.clientY,
+				});
 				dispatch(
-					setSeconds(
-						calcSecondsFromPixels(e.clientX - boundingRect.left + canvasScroll.x)
-					)
+					setSeconds(calcSecondsFromPixels(offsetMousePosition.x + canvasScroll.x))
 				);
 				break;
 			}

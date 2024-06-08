@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { ReactNode } from 'react';
 
 export type Coordinate = {
 	x: number;
@@ -25,6 +26,8 @@ type WindowState = {
 	canvasHistory: string[];
 	currentHistoryIndex: number;
 	canvasScroll: Coordinate;
+	isModalOpen: boolean;
+	modalContents: ReactNode | null;
 };
 
 const initialState = {
@@ -41,6 +44,8 @@ const initialState = {
 		canvasHistory: [],
 		currentHistoryIndex: -1,
 		canvasScroll: { x: 0, y: 0 },
+		isModalOpen: false,
+		modalContents: null,
 	} as WindowState,
 } as InitialState;
 
@@ -100,6 +105,12 @@ export const window = createSlice({
 		setCanvasScroll: (state, action: PayloadAction<Coordinate>) => {
 			state.value.canvasScroll = action.payload;
 		},
+		setIsModalOpen: (state, action: PayloadAction<boolean>) => {
+			state.value.isModalOpen = action.payload;
+		},
+		setModalContents: (state, action: PayloadAction<ReactNode>) => {
+			state.value.modalContents = action.payload;
+		},
 	},
 });
 
@@ -117,5 +128,7 @@ export const {
 	appendCanvasHistory,
 	setCurrentHistoryIndex,
 	setCanvasScroll,
+	setIsModalOpen,
+	setModalContents,
 } = window.actions;
 export default window.reducer;

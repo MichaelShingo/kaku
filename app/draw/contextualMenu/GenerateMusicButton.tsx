@@ -26,6 +26,7 @@ const GenerateMusicButton: React.FC<GenerateMusicButtonProps> = ({
 					isActive ? 'animate-color-shift' : 'none'
 				} active:${isActive ? 'scale-95' : 'scale-100'}`}
 				style={{
+					transform: isActive ? 'scale(95%)' : 'scale(100%)',
 					cursor: isActive ? 'pointer' : 'auto',
 					backgroundColor: isActive ? COLORS['light-pink'] : COLORS['light-grey'],
 				}}

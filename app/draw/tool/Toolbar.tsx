@@ -18,9 +18,14 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { setColor, setSelectedTool, Tool } from '@/redux/features/toolSlice';
 import { getCanvasContext } from '../../utils/canvasContext';
-import { setCurrentHistoryIndex } from '@/redux/features/windowSlice';
+import {
+	setCurrentHistoryIndex,
+	setIsModalOpen,
+	setModalContents,
+} from '@/redux/features/windowSlice';
 import { COLORS } from '@/app/utils/colors';
 import { setIsAudioReady } from '@/redux/features/audioSlice';
+import SaveModal from '../modal/SaveModal';
 
 const Toolbar = () => {
 	const dispatch = useDispatch();
@@ -64,7 +69,8 @@ const Toolbar = () => {
 	};
 
 	const save = () => {
-		console.log('save');
+		dispatch(setIsModalOpen(true));
+		dispatch(setModalContents(<SaveModal />));
 	};
 
 	const createNewFile = () => {

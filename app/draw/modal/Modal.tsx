@@ -6,16 +6,26 @@ import { faX } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { setIsModalOpen } from '@/redux/features/windowSlice';
 import { COLORS } from '@/app/utils/colors';
+import SaveModal from './SaveModal';
 
 interface ModalProps {}
 
 const Modal: React.FC<ModalProps> = () => {
 	const dispatch = useDispatch();
 	const isModalOpen = useAppSelector((state) => state.windowReducer.value.isModalOpen);
-	const modalContents: ReactNode | null = useAppSelector(
-		(state) => state.windowReducer.value.modalContents
+	const modalContent: ReactNode | null = useAppSelector(
+		(state) => state.windowReducer.value.modalContent
 	);
 	const [isXHovered, setIsXHovered] = useState<boolean>(false);
+
+	const generateModalContent = () => {
+		switch (modalContent) {
+			case 'save':
+				return <SaveModal />;
+			default:
+				return <></>;
+		}
+	};
 
 	return (
 		<div
@@ -46,7 +56,7 @@ const Modal: React.FC<ModalProps> = () => {
 						/>
 					</button>
 				</div>
-				{modalContents}
+				{generateModalContent()}
 			</div>
 		</div>
 	);

@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ReactNode } from 'react';
 
 export type Coordinate = {
 	x: number;
@@ -12,6 +11,8 @@ export type CanvasSize = {
 type InitialState = {
 	value: WindowState;
 };
+
+export type ModalContent = 'save';
 
 type WindowState = {
 	canvasCTX: CanvasRenderingContext2D | null;
@@ -27,7 +28,7 @@ type WindowState = {
 	currentHistoryIndex: number;
 	canvasScroll: Coordinate;
 	isModalOpen: boolean;
-	modalContents: ReactNode | null;
+	modalContent: string;
 };
 
 const initialState = {
@@ -37,7 +38,7 @@ const initialState = {
 		windowWidth: 0,
 		mousePosition: { x: 0, y: 0 },
 		isDragging: false,
-		canvasSize: { x: 500, y: 500 },
+		canvasSize: { x: 100, y: 400 },
 		canvasZoom: 100,
 		isMouseDown: false,
 		isCursorInCanvas: false,
@@ -45,7 +46,7 @@ const initialState = {
 		currentHistoryIndex: -1,
 		canvasScroll: { x: 0, y: 0 },
 		isModalOpen: false,
-		modalContents: null,
+		modalContent: 'save',
 	} as WindowState,
 } as InitialState;
 
@@ -108,8 +109,8 @@ export const window = createSlice({
 		setIsModalOpen: (state, action: PayloadAction<boolean>) => {
 			state.value.isModalOpen = action.payload;
 		},
-		setModalContents: (state, action: PayloadAction<ReactNode>) => {
-			state.value.modalContents = action.payload;
+		setModalContent: (state, action: PayloadAction<string>) => {
+			state.value.modalContent = action.payload;
 		},
 	},
 });
@@ -129,6 +130,6 @@ export const {
 	setCurrentHistoryIndex,
 	setCanvasScroll,
 	setIsModalOpen,
-	setModalContents,
+	setModalContent,
 } = window.actions;
 export default window.reducer;

@@ -10,12 +10,13 @@ import {
 	mapRange,
 } from '@/app/utils/pixelToAudioConversion';
 import { useAppSelector } from '@/redux/store';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as Tone from 'tone';
 import {
 	setIsAudioReady,
 	setIsLoading,
 	setIsPlaying,
+	setIsRecording,
 	setLoadingMessage,
 	setSeconds,
 } from '@/redux/features/audioSlice';
@@ -30,7 +31,7 @@ const gainNodes: Tone.Gain[] = [];
 let gainFunctionRepeaterIds: number[] = [];
 
 let scheduleRepeaterId: number = -1;
-
+const chunks = [];
 const MusicMenu = () => {
 	const dispatch = useDispatch();
 	const isPlaying = useAppSelector((state) => state.audioReducer.value.isPlaying);
@@ -41,6 +42,11 @@ const MusicMenu = () => {
 	const isAudioReady = useAppSelector((state) => state.audioReducer.value.isAudioReady);
 	const seconds = useAppSelector((state) => state.audioReducer.value.seconds);
 	const canvasSize = useAppSelector((state) => state.windowReducer.value.canvasSize);
+	const [recorderDestination, setRecorderDestination] =
+		useState<MediaStreamAudioDestinationNode | null>(null);
+	const [recorder, setRecorder] = useState<MediaRecorder | null>(null);
+
+	const isRecording = useAppSelector((state) => state.audioReducer.value.isRecording);
 
 	const handleGenerateMusic = (): void => {
 		dispatch(setIsLoading(true));
@@ -60,6 +66,70 @@ const MusicMenu = () => {
 	};
 
 	useEffect(() => {
+		const setup = async () => {
+			const context: Tone.BaseContext = Tone.context;
+			const recorderDestination: MediaStreamAudioDestinationNode =
+				context.createMediaStreamDestination();
+			const recorder: MediaRecorder = new MediaRecorder(recorderDestination.stream);
+			setRecorderDestination(recorderDestination);
+			setRecorder(recorder);
+		};
+
+		setup();
+	}, []);
+
+	const startRecording = () => {
+		if (!recorder) {
+			return;
+		}
+		recorder.ondataavailable = (e) => {
+			if (e.data.size > 0) {
+				chunks.push(e.data);
+				console.log('pushing chunk');
+			}
+		};
+
+		recorder.onstop = (e) => {
+			const blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
+			console.log(blob);
+			chunks.length = 0;
+			const url = URL.createObjectURL(blob);
+			console.log(url);
+			const audio: HTMLAudioElement = document.getElementsByTagName('audio')[0];
+			audio.src = url;
+			const a = document.createElement('a');
+			a.style.display = 'none';
+			a.href = url;
+			a.download = 'myKakuAudio';
+			document.body.appendChild(a);
+			a.click();
+			window.URL.revokeObjectURL(url);
+		};
+
+		chunks.length = 0;
+		recorder.start();
+		playAudio();
+	};
+
+	const stopRecording = () => {
+		if (recorder) {
+			stopAudio();
+			recorder.stop();
+			dispatch(setIsRecording(false));
+		}
+	};
+
+	useEffect(() => {
+		if (isRecording) {
+			const audioLength = calcSecondsFromPixels(canvasSize.x) * 1000;
+			startRecording();
+			setTimeout(() => {
+				stopRecording();
+			}, audioLength);
+		}
+	}, [isRecording]);
+
+	useEffect(() => {
 		if (!isPlaying) {
 			synths.forEach((synth) => {
 				synth.releaseAll();
@@ -68,8 +138,13 @@ const MusicMenu = () => {
 	}, [isPlaying]);
 
 	const setupPolySynth = () => {
+		if (!recorderDestination) {
+			return;
+		}
 		const polySynth = new Tone.PolySynth().toDestination();
 		const gainNode = new Tone.Gain(-0.99).toDestination();
+		polySynth.connect(recorderDestination);
+		gainNode.connect(recorderDestination);
 		polySynth.sync();
 		polySynth.connect(gainNode);
 		synths.push(polySynth);
@@ -195,6 +270,8 @@ const MusicMenu = () => {
 
 	return (
 		<div className="flex flex-row items-center gap-2">
+			<audio className="none" controls={true}></audio>
+
 			<GenerateMusicButton
 				isActive={!isLoading && !isAudioReady && !isPlaying}
 				handleClick={handleGenerateMusic}

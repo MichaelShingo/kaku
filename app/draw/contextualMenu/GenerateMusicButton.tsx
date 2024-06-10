@@ -15,6 +15,7 @@ const GenerateMusicButton: React.FC<GenerateMusicButtonProps> = ({
 	const startSilentOsc = async (e: React.MouseEvent) => {
 		e.stopPropagation();
 		await Tone.start();
+		Tone.context.resume();
 		if (nativeAudioRef.current) {
 			nativeAudioRef.current.play();
 		}

@@ -21,11 +21,10 @@ import { getCanvasContext } from '../../utils/canvasContext';
 import {
 	setCurrentHistoryIndex,
 	setIsModalOpen,
-	setModalContents,
+	setModalContent,
 } from '@/redux/features/windowSlice';
 import { COLORS } from '@/app/utils/colors';
 import { setIsAudioReady } from '@/redux/features/audioSlice';
-import SaveModal from '../modal/SaveModal';
 
 const Toolbar = () => {
 	const dispatch = useDispatch();
@@ -70,7 +69,7 @@ const Toolbar = () => {
 
 	const save = () => {
 		dispatch(setIsModalOpen(true));
-		dispatch(setModalContents(<SaveModal />));
+		dispatch(setModalContent('save'));
 	};
 
 	const createNewFile = () => {

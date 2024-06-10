@@ -16,6 +16,7 @@ type AudioState = {
 	isAudioReady: boolean;
 	recorder: Recorder | null;
 	isRecording: boolean;
+	blobString: string | null;
 };
 
 const initialState = {
@@ -31,6 +32,7 @@ const initialState = {
 		isAudioReady: false,
 		recorder: null,
 		isRecording: false,
+		blobString: null,
 	} as AudioState,
 } as InitialState;
 
@@ -71,6 +73,9 @@ export const audio = createSlice({
 		setIsRecording: (state, action: PayloadAction<boolean>) => {
 			state.value.isRecording = action.payload;
 		},
+		setBlobString: (state, action: PayloadAction<string>) => {
+			state.value.blobString = action.payload;
+		},
 	},
 });
 
@@ -86,5 +91,6 @@ export const {
 	setIsAudioReady,
 	setRecorder,
 	setIsRecording,
+	setBlobString,
 } = audio.actions;
 export default audio.reducer;

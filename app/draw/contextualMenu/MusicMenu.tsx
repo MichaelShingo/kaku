@@ -13,6 +13,7 @@ import { useAppSelector } from '@/redux/store';
 import React, { useEffect, useState } from 'react';
 import * as Tone from 'tone';
 import {
+	setBlobString,
 	setIsAudioReady,
 	setIsLoading,
 	setIsPlaying,
@@ -85,25 +86,13 @@ const MusicMenu = () => {
 		recorder.ondataavailable = (e) => {
 			if (e.data.size > 0) {
 				chunks.push(e.data);
-				console.log('pushing chunk');
 			}
 		};
 
-		recorder.onstop = (e) => {
+		recorder.onstop = async () => {
 			const blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
-			console.log(blob);
-			chunks.length = 0;
-			const url = URL.createObjectURL(blob);
-			console.log(url);
-			const audio: HTMLAudioElement = document.getElementsByTagName('audio')[0];
-			audio.src = url;
-			const a = document.createElement('a');
-			a.style.display = 'none';
-			a.href = url;
-			a.download = 'myKakuAudio';
-			document.body.appendChild(a);
-			a.click();
-			window.URL.revokeObjectURL(url);
+			const blobURL: string = URL.createObjectURL(blob);
+			dispatch(setBlobString(blobURL));
 		};
 
 		chunks.length = 0;
@@ -270,8 +259,6 @@ const MusicMenu = () => {
 
 	return (
 		<div className="flex flex-row items-center gap-2">
-			<audio className="none" controls={true}></audio>
-
 			<GenerateMusicButton
 				isActive={!isLoading && !isAudioReady && !isPlaying}
 				handleClick={handleGenerateMusic}

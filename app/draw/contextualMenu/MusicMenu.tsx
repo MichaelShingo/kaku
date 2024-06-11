@@ -1,38 +1,23 @@
 'use client';
 import { getCanvasContext } from '@/app/utils/canvasContext';
-import { Island } from '@/app/utils/pixelAnalysis';
-import {
-	calcMaxSimultaneousVoices,
-	calcPixelsFromSeconds,
-	calcSecondsFromPixels,
-	doesRangeOverlap,
-	hlToFrequency,
-	mapRange,
-} from '@/app/utils/pixelToAudioConversion';
+import { calcSecondsFromPixels } from '@/app/utils/pixelToAudioConversion';
 import { useAppSelector } from '@/redux/store';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import * as Tone from 'tone';
 import {
-	setBlobString,
 	setIsAudioReady,
 	setIsLoading,
 	setIsPlaying,
-	setIsRecording,
 	setLoadingMessage,
 	setSeconds,
 } from '@/redux/features/audioSlice';
 import { useDispatch } from 'react-redux';
 import { faPause, faPlay, faStop } from '@fortawesome/free-solid-svg-icons';
-import { Coordinate } from '@/redux/features/windowSlice';
 import PlaybackButton from './PlaybackButton';
 import GenerateMusicButton from './GenerateMusicButton';
-
-const synths: Tone.PolySynth[] = [];
-const gainNodes: Tone.Gain[] = [];
-let gainFunctionRepeaterIds: number[] = [];
+import useAudio from '../audio/useAudio';
 
 let scheduleRepeaterId: number = -1;
-const chunks = [];
 const MusicMenu = () => {
 	const dispatch = useDispatch();
 	const isPlaying = useAppSelector((state) => state.audioReducer.value.isPlaying);
@@ -42,12 +27,10 @@ const MusicMenu = () => {
 	const isLoading = useAppSelector((state) => state.audioReducer.value.isLoading);
 	const isAudioReady = useAppSelector((state) => state.audioReducer.value.isAudioReady);
 	const seconds = useAppSelector((state) => state.audioReducer.value.seconds);
-	const canvasSize = useAppSelector((state) => state.windowReducer.value.canvasSize);
-	const [recorderDestination, setRecorderDestination] =
-		useState<MediaStreamAudioDestinationNode | null>(null);
-	const [recorder, setRecorder] = useState<MediaRecorder | null>(null);
-
 	const isRecording = useAppSelector((state) => state.audioReducer.value.isRecording);
+
+	const canvasSize = useAppSelector((state) => state.windowReducer.value.canvasSize);
+	const { scheduleMidi, synths } = useAudio();
 
 	const handleGenerateMusic = (): void => {
 		dispatch(setIsLoading(true));
@@ -67,58 +50,6 @@ const MusicMenu = () => {
 	};
 
 	useEffect(() => {
-		const setup = async () => {
-			const context: Tone.BaseContext = Tone.context;
-			const recorderDestination: MediaStreamAudioDestinationNode =
-				context.createMediaStreamDestination();
-			const recorder: MediaRecorder = new MediaRecorder(recorderDestination.stream);
-			setRecorderDestination(recorderDestination);
-			setRecorder(recorder);
-		};
-
-		setup();
-	}, []);
-
-	const startRecording = () => {
-		if (!recorder) {
-			return;
-		}
-		recorder.ondataavailable = (e) => {
-			if (e.data.size > 0) {
-				chunks.push(e.data);
-			}
-		};
-
-		recorder.onstop = async () => {
-			const blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
-			const blobURL: string = URL.createObjectURL(blob);
-			dispatch(setBlobString(blobURL));
-		};
-
-		chunks.length = 0;
-		recorder.start();
-		playAudio();
-	};
-
-	const stopRecording = () => {
-		if (recorder) {
-			stopAudio();
-			recorder.stop();
-			dispatch(setIsRecording(false));
-		}
-	};
-
-	useEffect(() => {
-		if (isRecording) {
-			const audioLength = calcSecondsFromPixels(canvasSize.x) * 1000;
-			startRecording();
-			setTimeout(() => {
-				stopRecording();
-			}, audioLength);
-		}
-	}, [isRecording]);
-
-	useEffect(() => {
 		if (!isPlaying) {
 			synths.forEach((synth) => {
 				synth.releaseAll();
@@ -126,99 +57,13 @@ const MusicMenu = () => {
 		}
 	}, [isPlaying]);
 
-	const setupPolySynth = () => {
-		if (!recorderDestination) {
-			return;
+	useEffect(() => {
+		if (isRecording) {
+			playAudio();
+		} else {
+			stopAudio();
 		}
-		const polySynth = new Tone.PolySynth().toDestination();
-		const gainNode = new Tone.Gain(-0.99).toDestination();
-		polySynth.connect(recorderDestination);
-		gainNode.connect(recorderDestination);
-		polySynth.sync();
-		polySynth.connect(gainNode);
-		synths.push(polySynth);
-		gainNodes.push(gainNode);
-	};
-
-	const scheduleMidi = (islands: Island[]): void => {
-		gainFunctionRepeaterIds.forEach((id) => {
-			Tone.Transport.clear(id);
-		});
-		gainFunctionRepeaterIds = [];
-		const maxSimultaneousVoices: number = calcMaxSimultaneousVoices(islands);
-		Tone.Transport.cancel();
-
-		const newSynthCount = maxSimultaneousVoices - synths.length;
-		for (let i = 0; i < newSynthCount; i++) {
-			setupPolySynth();
-		}
-
-		const scheduledRanges: number[][][] = [];
-		for (let i = 0; i < maxSimultaneousVoices; i++) {
-			scheduledRanges.push([]);
-		}
-
-		islands.forEach((island) => {
-			const duration = calcSecondsFromPixels(island.maxCol - island.minCol);
-			const startTime = calcSecondsFromPixels(island.minCol);
-			const frequency = hlToFrequency(island.hsl.h, island.hsl.l);
-
-			let currentSynthIndex = 0;
-			let isOverlapping = true;
-			const currentRange = [island.minCol, island.maxCol];
-
-			while (isOverlapping && currentSynthIndex < maxSimultaneousVoices) {
-				isOverlapping = doesRangeOverlap(
-					scheduledRanges[currentSynthIndex],
-					currentRange
-				);
-				if (!isOverlapping) {
-					scheduledRanges[currentSynthIndex].push(currentRange);
-					island.synthIndex = currentSynthIndex;
-					synths[currentSynthIndex].triggerAttackRelease(frequency, duration, startTime);
-				}
-				currentSynthIndex++;
-			}
-
-			const calcGainAtTime = (time: number): void => {
-				const pixelX = calcPixelsFromSeconds(time);
-				const point1: Coordinate = {
-					x: Math.floor(pixelX),
-					y: island.colCounts[Math.floor(pixelX)],
-				};
-				const point2: Coordinate = {
-					x: Math.ceil(pixelX),
-					y: island.colCounts[Math.ceil(pixelX)],
-				};
-
-				const slope = (point2.y - point1.y) / (point2.x - point1.x);
-				const estimatedHeightPixels: number =
-					slope * pixelX - slope * point1.x + point1.y;
-				const gainRange = 1.98 / maxSimultaneousVoices;
-				const volume = mapRange(
-					estimatedHeightPixels,
-					0,
-					canvasSize.y,
-					-0.99,
-					-0.99 + gainRange
-				);
-				if (volume) {
-					gainNodes[island.synthIndex].gain.value = volume;
-				}
-			};
-
-			const gainFunctionRepeaterId: number = Tone.Transport.scheduleRepeat(
-				() => {
-					calcGainAtTime(Tone.Transport.seconds);
-				},
-				0.05,
-				startTime,
-				duration
-			);
-
-			gainFunctionRepeaterIds.push(gainFunctionRepeaterId);
-		});
-	};
+	}, [isRecording]);
 
 	const stopAudio = () => {
 		dispatch(setIsPlaying(false));
@@ -227,19 +72,18 @@ const MusicMenu = () => {
 		dispatch(setSeconds(0));
 	};
 
-	const checkIsEndofAudio = (transportTime: number, audioDuration: number) => {
-		if (transportTime > audioDuration) {
-			stopAudio();
-		}
-	};
-
 	const playAudio = async () => {
 		await Tone.start();
-
 		const startTime: number = seconds;
 		Tone.Transport.seconds = startTime;
 		Tone.Transport.start();
 		dispatch(setIsPlaying(true));
+
+		const checkIsEndofAudio = (transportTime: number, audioDuration: number) => {
+			if (transportTime > audioDuration) {
+				stopAudio();
+			}
+		};
 
 		scheduleRepeaterId = Tone.Transport.scheduleRepeat(
 			() => {

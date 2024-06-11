@@ -5,11 +5,9 @@ import { useAppSelector } from '@/redux/store';
 import React, { useEffect } from 'react';
 import * as Tone from 'tone';
 import {
-	setBlobString,
 	setIsAudioReady,
 	setIsLoading,
 	setIsPlaying,
-	setIsRecording,
 	setLoadingMessage,
 	setSeconds,
 } from '@/redux/features/audioSlice';
@@ -20,7 +18,6 @@ import GenerateMusicButton from './GenerateMusicButton';
 import useAudio from '../audio/useAudio';
 
 let scheduleRepeaterId: number = -1;
-const chunks = [];
 const MusicMenu = () => {
 	const dispatch = useDispatch();
 	const isPlaying = useAppSelector((state) => state.audioReducer.value.isPlaying);
@@ -30,10 +27,10 @@ const MusicMenu = () => {
 	const isLoading = useAppSelector((state) => state.audioReducer.value.isLoading);
 	const isAudioReady = useAppSelector((state) => state.audioReducer.value.isAudioReady);
 	const seconds = useAppSelector((state) => state.audioReducer.value.seconds);
-	const canvasSize = useAppSelector((state) => state.windowReducer.value.canvasSize);
-	const { scheduleMidi, synths, recorder } = useAudio();
-
 	const isRecording = useAppSelector((state) => state.audioReducer.value.isRecording);
+
+	const canvasSize = useAppSelector((state) => state.windowReducer.value.canvasSize);
+	const { scheduleMidi, synths } = useAudio();
 
 	const handleGenerateMusic = (): void => {
 		dispatch(setIsLoading(true));
@@ -52,45 +49,6 @@ const MusicMenu = () => {
 		};
 	};
 
-	const startRecording = () => {
-		if (!recorder) {
-			return;
-		}
-		recorder.ondataavailable = (e) => {
-			if (e.data.size > 0) {
-				chunks.push(e.data);
-			}
-		};
-
-		recorder.onstop = async () => {
-			const blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
-			const blobURL: string = URL.createObjectURL(blob);
-			dispatch(setBlobString(blobURL));
-		};
-
-		chunks.length = 0;
-		recorder.start();
-		playAudio();
-	};
-
-	const stopRecording = () => {
-		if (recorder) {
-			stopAudio();
-			recorder.stop();
-			dispatch(setIsRecording(false));
-		}
-	};
-
-	useEffect(() => {
-		if (isRecording) {
-			const audioLength = calcSecondsFromPixels(canvasSize.x) * 1000;
-			startRecording();
-			setTimeout(() => {
-				stopRecording();
-			}, audioLength);
-		}
-	}, [isRecording]);
-
 	useEffect(() => {
 		if (!isPlaying) {
 			synths.forEach((synth) => {
@@ -99,6 +57,14 @@ const MusicMenu = () => {
 		}
 	}, [isPlaying]);
 
+	useEffect(() => {
+		if (isRecording) {
+			playAudio();
+		} else {
+			stopAudio();
+		}
+	}, [isRecording]);
+
 	const stopAudio = () => {
 		dispatch(setIsPlaying(false));
 		Tone.Transport.clear(scheduleRepeaterId);
@@ -106,19 +72,18 @@ const MusicMenu = () => {
 		dispatch(setSeconds(0));
 	};
 
-	const checkIsEndofAudio = (transportTime: number, audioDuration: number) => {
-		if (transportTime > audioDuration) {
-			stopAudio();
-		}
-	};
-
 	const playAudio = async () => {
 		await Tone.start();
-
 		const startTime: number = seconds;
 		Tone.Transport.seconds = startTime;
 		Tone.Transport.start();
 		dispatch(setIsPlaying(true));
+
+		const checkIsEndofAudio = (transportTime: number, audioDuration: number) => {
+			if (transportTime > audioDuration) {
+				stopAudio();
+			}
+		};
 
 		scheduleRepeaterId = Tone.Transport.scheduleRepeat(
 			() => {

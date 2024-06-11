@@ -1,3 +1,4 @@
+'use client';
 import MainActionButton from '../MainActionButton';
 import { useDispatch } from 'react-redux';
 import { setIsRecording } from '@/redux/features/audioSlice';
@@ -5,12 +6,14 @@ import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
 import { useEffect, useRef } from 'react';
 import { useAppSelector } from '@/redux/store';
+import useRecording from '../audio/useRecording';
 
 const SaveModal = () => {
 	const dispatch = useDispatch();
 	const audioBlobString = useAppSelector((state) => state.audioReducer.value.blobString);
 	const ffmpegRef = useRef(new FFmpeg());
 	const messageRef = useRef<HTMLParagraphElement | null>(null);
+	useRecording();
 
 	const downloadImage = () => {
 		const canvas = document.getElementById('canvas') as HTMLCanvasElement;

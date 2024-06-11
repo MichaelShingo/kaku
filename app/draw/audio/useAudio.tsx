@@ -10,26 +10,24 @@ import {
 let gainFunctionRepeaterIds: number[] = [];
 import { Coordinate } from '@/redux/features/windowSlice';
 import { useAppSelector } from '@/redux/store';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import * as Tone from 'tone';
 
 const gainNodes: Tone.Gain[] = [];
 const synths: Tone.PolySynth[] = [];
+let recorderDestination: MediaStreamAudioDestinationNode | null = null;
+let recorder: MediaRecorder | null = null;
 const useAudio = () => {
 	const canvasSize = useAppSelector((state) => state.windowReducer.value.canvasSize);
-	const [recorderDestination, setRecorderDestination] =
-		useState<MediaStreamAudioDestinationNode | null>(null);
-	// const [synths, setSynths] = useState<Tone.PolySynth[]>([]);
-	const [recorder, setRecorder] = useState<MediaRecorder | null>(null);
 
 	useEffect(() => {
 		const setup = async () => {
 			const context: Tone.BaseContext = Tone.context;
-			const recorderDestination: MediaStreamAudioDestinationNode =
+			const recorderDestinationNew: MediaStreamAudioDestinationNode =
 				context.createMediaStreamDestination();
-			const recorder: MediaRecorder = new MediaRecorder(recorderDestination.stream);
-			setRecorderDestination(recorderDestination);
-			setRecorder(recorder);
+			const recorderNew: MediaRecorder = new MediaRecorder(recorderDestinationNew.stream);
+			recorderDestination = recorderDestinationNew;
+			recorder = recorderNew;
 		};
 
 		setup();

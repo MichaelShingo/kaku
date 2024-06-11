@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import Recorder from 'recorder-js';
-import * as Tone from 'tone';
 type InitialState = {
 	value: AudioState;
 };
@@ -18,8 +17,6 @@ type AudioState = {
 	recorder: Recorder | null;
 	isRecording: boolean;
 	blobString: string | null;
-	recorderDestination: MediaStreamAudioDestinationNode | null;
-	synths: Tone.PolySynth[];
 };
 
 const initialState = {
@@ -36,8 +33,6 @@ const initialState = {
 		recorder: null,
 		isRecording: false,
 		blobString: null,
-		recorderDestination: null,
-		synths: [],
 	} as AudioState,
 } as InitialState;
 
@@ -81,15 +76,6 @@ export const audio = createSlice({
 		setBlobString: (state, action: PayloadAction<string>) => {
 			state.value.blobString = action.payload;
 		},
-		setRecorderDestination: (
-			state,
-			action: PayloadAction<MediaStreamAudioDestinationNode>
-		) => {
-			state.value.recorderDestination = action.payload;
-		},
-		setSynths: (state, action: PayloadAction<Tone.PolySynth[]>) => {
-			state.value.synths = action.payload;
-		},
 	},
 });
 
@@ -106,7 +92,5 @@ export const {
 	setRecorder,
 	setIsRecording,
 	setBlobString,
-	setRecorderDestination,
-	setSynths,
 } = audio.actions;
 export default audio.reducer;

@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import Recorder from 'recorder-js';
 type InitialState = {
 	value: AudioState;
 };
@@ -14,7 +13,6 @@ type AudioState = {
 	isLoading: boolean;
 	loadingMessage: string;
 	isAudioReady: boolean;
-	recorder: Recorder | null;
 	isRecording: boolean;
 	blobString: string | null;
 };
@@ -30,7 +28,6 @@ const initialState = {
 		isLoading: false,
 		loadingMessage: '',
 		isAudioReady: false,
-		recorder: null,
 		isRecording: false,
 		blobString: null,
 	} as AudioState,
@@ -67,9 +64,7 @@ export const audio = createSlice({
 		setIsAudioReady: (state, action: PayloadAction<boolean>) => {
 			state.value.isAudioReady = action.payload;
 		},
-		setRecorder: (state, action: PayloadAction<Recorder>) => {
-			state.value.recorder = action.payload;
-		},
+
 		setIsRecording: (state, action: PayloadAction<boolean>) => {
 			state.value.isRecording = action.payload;
 		},
@@ -89,7 +84,6 @@ export const {
 	setIsLoading,
 	setLoadingMessage,
 	setIsAudioReady,
-	setRecorder,
 	setIsRecording,
 	setBlobString,
 } = audio.actions;

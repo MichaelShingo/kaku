@@ -1,5 +1,5 @@
 'use client';
-import MainActionButton from '../MainActionButton';
+import MainActionButton from '../../components/MainActionButton';
 import { useDispatch } from 'react-redux';
 import { setIsRecording } from '@/redux/features/audioSlice';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
@@ -73,8 +73,16 @@ const SaveModal = () => {
 
 	return (
 		<div className="flex flex-col items-center gap-8">
-			<MainActionButton label="Download Image" handleClick={downloadImage} />
-			<MainActionButton label="Download Audio" handleClick={downloadAudio} />
+			<MainActionButton
+				label="Download Image"
+				isActive={true}
+				handleClick={downloadImage}
+			/>
+			<MainActionButton
+				label="Download Audio"
+				isActive={true}
+				handleClick={downloadAudio}
+			/>
 		</div>
 	);
 };

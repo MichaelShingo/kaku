@@ -13,6 +13,32 @@ const useRecording = () => {
 	const { recorder } = useAudio();
 
 	useEffect(() => {
+		const startRecording = () => {
+			if (!recorder) {
+				return;
+			}
+			recorder.ondataavailable = (e) => {
+				if (e.data.size > 0) {
+					chunks.push(e.data);
+				}
+			};
+
+			recorder.onstop = async () => {
+				const blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
+				const blobURL: string = URL.createObjectURL(blob);
+				dispatch(setBlobString(blobURL));
+			};
+
+			chunks.length = 0;
+			recorder.start();
+		};
+
+		const stopRecording = () => {
+			if (recorder) {
+				recorder.stop();
+				dispatch(setIsRecording(false));
+			}
+		};
 		if (isRecording) {
 			const audioLength = calcSecondsFromPixels(canvasSize.x) * 1000;
 			startRecording();
@@ -21,33 +47,6 @@ const useRecording = () => {
 			}, audioLength);
 		}
 	}, [isRecording]);
-
-	const startRecording = () => {
-		if (!recorder) {
-			return;
-		}
-		recorder.ondataavailable = (e) => {
-			if (e.data.size > 0) {
-				chunks.push(e.data);
-			}
-		};
-
-		recorder.onstop = async () => {
-			const blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
-			const blobURL: string = URL.createObjectURL(blob);
-			dispatch(setBlobString(blobURL));
-		};
-
-		chunks.length = 0;
-		recorder.start();
-	};
-
-	const stopRecording = () => {
-		if (recorder) {
-			recorder.stop();
-			dispatch(setIsRecording(false));
-		}
-	};
 
 	return {};
 };

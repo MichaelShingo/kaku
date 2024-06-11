@@ -2,7 +2,7 @@
 import { getCanvasContext } from '@/app/utils/canvasContext';
 import { calcSecondsFromPixels } from '@/app/utils/pixelToAudioConversion';
 import { useAppSelector } from '@/redux/store';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import * as Tone from 'tone';
 import {
 	setIsAudioReady,
@@ -14,12 +14,13 @@ import {
 import { useDispatch } from 'react-redux';
 import { faPause, faPlay, faStop } from '@fortawesome/free-solid-svg-icons';
 import PlaybackButton from './PlaybackButton';
-import GenerateMusicButton from './GenerateMusicButton';
 import useAudio from '../audio/useAudio';
+import MainActionButton from '@/app/components/MainActionButton';
 
 let scheduleRepeaterId: number = -1;
 const MusicMenu = () => {
 	const dispatch = useDispatch();
+
 	const isPlaying = useAppSelector((state) => state.audioReducer.value.isPlaying);
 	const loadingMessage = useAppSelector(
 		(state) => state.audioReducer.value.loadingMessage
@@ -28,11 +29,22 @@ const MusicMenu = () => {
 	const isAudioReady = useAppSelector((state) => state.audioReducer.value.isAudioReady);
 	const seconds = useAppSelector((state) => state.audioReducer.value.seconds);
 	const isRecording = useAppSelector((state) => state.audioReducer.value.isRecording);
-
 	const canvasSize = useAppSelector((state) => state.windowReducer.value.canvasSize);
+
+	const nativeAudioRef = useRef<HTMLAudioElement | null>(null);
+
 	const { scheduleMidi, synths } = useAudio();
 
+	const startSilentOsc = async () => {
+		await Tone.start();
+		Tone.context.resume();
+		if (nativeAudioRef.current) {
+			nativeAudioRef.current.play();
+		}
+	};
+
 	const handleGenerateMusic = (): void => {
+		startSilentOsc();
 		dispatch(setIsLoading(true));
 		const ctx = getCanvasContext();
 		const imageData: ImageData = ctx.getImageData(0, 0, canvasSize.x, canvasSize.y);
@@ -103,7 +115,8 @@ const MusicMenu = () => {
 
 	return (
 		<div className="flex flex-row items-center gap-2">
-			<GenerateMusicButton
+			<MainActionButton
+				label="Generate Music"
 				isActive={!isLoading && !isAudioReady && !isPlaying}
 				handleClick={handleGenerateMusic}
 			/>
@@ -122,6 +135,9 @@ const MusicMenu = () => {
 				<img className="h-full w-8" src="/blockLoading.svg"></img>
 			</div>
 			<h3 style={{ display: isLoading ? 'block' : 'none' }}>{loadingMessage}</h3>
+			<audio ref={nativeAudioRef}>
+				<source src="/silent.mp3" type="audio/mp3"></source>
+			</audio>
 		</div>
 	);
 };

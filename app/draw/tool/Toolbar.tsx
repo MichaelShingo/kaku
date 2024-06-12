@@ -25,7 +25,6 @@ import {
 } from '@/redux/features/windowSlice';
 import { COLORS } from '@/app/utils/colors';
 import { setIsAudioReady } from '@/redux/features/audioSlice';
-import { useState } from 'react';
 
 const Toolbar = () => {
 	const dispatch = useDispatch();
@@ -79,7 +78,7 @@ const Toolbar = () => {
 
 	return (
 		<div
-			className="absolute left-0 top-0 z-10 flex h-[100vh] w-14 flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-slate-600 to-off-black shadow-md shadow-black"
+			className="fixed left-0 top-0 z-20 flex h-[100vh] w-14 flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-slate-600 to-off-black shadow-md shadow-black"
 			onClick={(e) => e.stopPropagation()}
 		>
 			<div className="flex h-[85%] flex-col items-center justify-evenly">

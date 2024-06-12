@@ -255,16 +255,15 @@ function App() {
 		}
 	};
 	return (
-		<div className="mb-20 ml-16 mr-20 mt-14 flex h-full w-full items-center justify-center">
+		<div className="h-[100vh] w-[100vw]">
 			<div
 				ref={canvasContainerRef}
-				onScroll={handleScroll}
-				className="relative mb-48 mr-20 mt-32 h-[90%] w-fit overflow-x-auto overflow-y-auto"
+				className="relative flex h-[200%] w-[200%] items-center justify-center"
 			>
-				<PlaybackCanvas />
+				{/* <PlaybackCanvas /> */}
 				<canvas
 					id="canvas"
-					className="cursor-none border-[3px] border-off-black"
+					className="relative cursor-none border-[3px] border-off-black"
 					ref={canvasRef}
 					onMouseEnter={() => {
 						dispatch(setIsCursorInCanvas(true));

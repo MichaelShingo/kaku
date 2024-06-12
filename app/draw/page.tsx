@@ -9,7 +9,7 @@ import Modal from './modal/Modal';
 
 export default function Home() {
 	return (
-		<div className="h-[100vh] overflow-hidden">
+		<div className="h-[100vh] w-[100vw] overflow-scroll bg-[url('/kakuBackdrop.svg')] bg-[size:200%] bg-no-repeat">
 			<Modal />
 			<ShapePreview />
 			<ToolCursor />

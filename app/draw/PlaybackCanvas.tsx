@@ -64,7 +64,7 @@ const PlaybackCanvas = () => {
 	return (
 		<canvas
 			id="playback-canvas"
-			className="pointer-events-none absolute inset-0 z-50 border-[3px] border-transparent"
+			className="pointer-events-none absolute inset-0 z-40 border-[3px] border-transparent bg-orange-200"
 			ref={playbackCanvasRef}
 		></canvas>
 	);

@@ -1,6 +1,5 @@
 import { COLORS } from '@/app/utils/colors';
-import React, { useRef } from 'react';
-import * as Tone from 'tone';
+import React from 'react';
 
 interface GenerateMusicButtonProps {
 	isActive: boolean;
@@ -10,16 +9,6 @@ const GenerateMusicButton: React.FC<GenerateMusicButtonProps> = ({
 	isActive,
 	handleClick,
 }) => {
-	const nativeAudioRef = useRef<HTMLAudioElement | null>(null);
-
-	const startSilentOsc = async (e: React.MouseEvent) => {
-		e.stopPropagation();
-		await Tone.start();
-		Tone.context.resume();
-		if (nativeAudioRef.current) {
-			nativeAudioRef.current.play();
-		}
-	};
 	return (
 		<>
 			<button
@@ -32,15 +21,11 @@ const GenerateMusicButton: React.FC<GenerateMusicButtonProps> = ({
 					backgroundColor: isActive ? COLORS['light-pink'] : COLORS['light-grey'],
 				}}
 				onClick={(e) => {
-					startSilentOsc(e);
 					isActive ? handleClick() : () => {};
 				}}
 			>
 				Generate Music
 			</button>
-			<audio ref={nativeAudioRef}>
-				<source src="/silent.mp3" type="audio/mp3"></source>
-			</audio>
 		</>
 	);
 };

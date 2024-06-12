@@ -11,6 +11,7 @@ module.exports = {
 				'light-blue': '#01baef',
 				'light-pink': '#d972ff',
 				'light-grey': '#666666',
+				'black-trans': 'rgba(0,0,0,0.3)',
 			},
 			backgroundImage: {
 				imageIcon: 'url("/imageIcon.svg")',

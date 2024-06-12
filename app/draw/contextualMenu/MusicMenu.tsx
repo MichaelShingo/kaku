@@ -16,6 +16,7 @@ import { faPause, faPlay, faStop } from '@fortawesome/free-solid-svg-icons';
 import PlaybackButton from './PlaybackButton';
 import useAudio from '../audio/useAudio';
 import MainActionButton from '@/app/components/MainActionButton';
+import Loading from '@/app/components/Loading';
 
 let scheduleRepeaterId: number = -1;
 const MusicMenu = () => {
@@ -131,10 +132,7 @@ const MusicMenu = () => {
 				handleClick={playAudio}
 			/>
 			<PlaybackButton isActive={isPlaying} icon={faPause} handleClick={pauseAudio} />
-			<div className="h-full w-fit" style={{ display: isLoading ? 'block' : 'none' }}>
-				<img className="h-full w-8" src="/blockLoading.svg"></img>
-			</div>
-			<h3 style={{ display: isLoading ? 'block' : 'none' }}>{loadingMessage}</h3>
+			<Loading isLoading={isLoading} message={loadingMessage} />
 			<audio ref={nativeAudioRef}>
 				<source src="/silent.mp3" type="audio/mp3"></source>
 			</audio>

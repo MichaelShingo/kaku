@@ -4,18 +4,23 @@ import { useDispatch } from 'react-redux';
 import { setIsRecording } from '@/redux/features/audioSlice';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAppSelector } from '@/redux/store';
 import useRecording from '../audio/useRecording';
+import Loading from '@/app/components/Loading';
 
 const SaveModal = () => {
 	const dispatch = useDispatch();
 	const audioBlobString = useAppSelector((state) => state.audioReducer.value.blobString);
 	const ffmpegRef = useRef(new FFmpeg());
 	const messageRef = useRef<HTMLParagraphElement | null>(null);
+	const [isLoading, setIsLoading] = useState<boolean>(false);
+	const [loadingMessage, setLoadingMessage] = useState<string>('');
 	useRecording();
 
 	const downloadImage = () => {
+		setIsLoading(true);
+		setLoadingMessage('Downloading...');
 		const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 		const canvasURL = canvas.toDataURL();
 		const anchor = document.createElement('a');
@@ -23,9 +28,13 @@ const SaveModal = () => {
 		anchor.download = 'myKakuDrawing';
 		anchor.click();
 		anchor.remove();
+		setIsLoading(false);
+		setLoadingMessage('');
 	};
 
 	const downloadAudio = async () => {
+		setIsLoading(true);
+		setLoadingMessage('Capturing audio...');
 		dispatch(setIsRecording(true));
 	};
 
@@ -43,6 +52,7 @@ const SaveModal = () => {
 		};
 
 		const transcode = async () => {
+			setLoadingMessage('Converting to WAV file...');
 			const res: Response = await fetch(audioBlobString);
 			const blob: Blob = await res.blob();
 
@@ -59,6 +69,8 @@ const SaveModal = () => {
 			document.body.appendChild(anchor);
 			anchor.click();
 			window.URL.revokeObjectURL(url);
+			setIsLoading(false);
+			setLoadingMessage('');
 		};
 
 		const convertAudio = async () => {
@@ -83,6 +95,7 @@ const SaveModal = () => {
 				isActive={true}
 				handleClick={downloadAudio}
 			/>
+			<Loading isLoading={isLoading} message={loadingMessage} />
 		</div>
 	);
 };

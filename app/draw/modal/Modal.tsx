@@ -36,7 +36,7 @@ const Modal: React.FC<ModalProps> = () => {
 			}}
 		>
 			<div
-				className="fixed z-50 h-fit min-h-52 w-fit min-w-[40%] border-[4px] border-light-pink bg-off-white transition-all"
+				className="fixed z-50 h-fit min-h-52 w-fit min-w-[40%] border-[4px] border-light-pink bg-off-white pb-5 transition-all"
 				style={{
 					transform: isModalOpen ? 'scale(100%)' : 'scale(50%)',
 				}}

@@ -16,7 +16,6 @@ const MainActionButton: React.FC<MainActionButtonProps> = ({
 				<button
 					className="w-fit bg-light-pink px-5 py-[10px] text-off-white shadow-outer-sm transition-all hover:scale-105 hover:animate-color-shift hover:border-transparent active:shadow-inner-md"
 					style={{
-						// transform: isActive ? 'scale(95%)' : 'scale(100%)',
 						backgroundColor: isActive ? COLORS['light-pink'] : COLORS['light-grey'],
 					}}
 					onClick={() => {

@@ -25,6 +25,7 @@ import {
 } from '@/redux/features/windowSlice';
 import { COLORS } from '@/app/utils/colors';
 import { setIsAudioReady } from '@/redux/features/audioSlice';
+import { useState } from 'react';
 
 const Toolbar = () => {
 	const dispatch = useDispatch();
@@ -78,7 +79,7 @@ const Toolbar = () => {
 
 	return (
 		<div
-			className="absolute left-0 top-0 z-10 flex h-[100vh] w-14 flex-col items-center justify-center overflow-hidden bg-off-black"
+			className="absolute left-0 top-0 z-10 flex h-[100vh] w-14 flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-slate-600 to-off-black shadow-md shadow-black"
 			onClick={(e) => e.stopPropagation()}
 		>
 			<div className="flex h-[85%] flex-col items-center justify-evenly">
@@ -116,34 +117,38 @@ const ToolButton: React.FC<ToolButtonProps> = ({ toolName, icon }) => {
 	const selectedTool = useAppSelector((state) => state.toolReducer.value.selectedTool);
 	const isLoading = useAppSelector((state) => state.audioReducer.value.isLoading);
 	const isPlaying = useAppSelector((state) => state.audioReducer.value.isPlaying);
+	// const [isHovered, setIsHovered] = useState<boolean>(false);
 
 	const dispatch = useDispatch();
 	const isActive: boolean = toolName === selectedTool;
 	const isDisabled = isLoading || isPlaying;
 
-	const generateIconColor = (): string => {
-		if (isActive) {
-			return COLORS['light-blue'];
-		}
-		if (isDisabled) {
-			return COLORS['light-grey'];
-		} else {
-			return COLORS['off-white'];
-		}
-	};
-
 	return (
 		<button
-			className="h-12 w-16"
+			className="h-12 w-16 transition-all duration-300"
 			style={{
-				backgroundColor: isActive ? 'black' : 'transparent',
+				backgroundColor: isActive ? 'transparent' : 'transparent',
 				cursor: isDisabled ? 'auto' : 'pointer',
 			}}
 			onClick={() => {
 				isDisabled ? () => {} : dispatch(setSelectedTool(toolName));
 			}}
+			// onMouseEnter={() => setIsHovered(true)}
+			// onMouseLeave={() => setIsHovered(false)}
 		>
-			<FontAwesomeIcon icon={icon} color={generateIconColor()} />
+			<FontAwesomeIcon
+				className="bg-none transition-all hover:opacity-70"
+				icon={icon}
+				color="white"
+				size={isActive ? 'lg' : '1x'}
+			/>
+			<div
+				className="absolute -z-10 h-12 w-[150%] -translate-y-[75%] bg-gradient-to-br from-light-pink to-light-blue transition duration-300"
+				style={{
+					opacity: isActive ? '100%' : '0%',
+					boxShadow: 'inset 0 2px 3px 0px rgb(0 0 0 / 0.8)',
+				}}
+			></div>
 		</button>
 	);
 };

@@ -1,15 +1,25 @@
 import { Coordinate } from '@/redux/features/windowSlice';
 import { useAppSelector } from '@/redux/store';
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as Tone from 'tone';
 import { calcPixelsFromSeconds } from '../utils/pixelToAudioConversion';
 
 let isPlayingLocal: boolean = false;
 
-const PlaybackCanvas = () => {
+interface PlaybackCanvasProps {
+	boundingRect: DOMRect | null;
+}
+
+const PlaybackCanvas: React.FC<PlaybackCanvasProps> = ({ boundingRect }) => {
 	const playbackCanvasRef = useRef<HTMLCanvasElement | null>(null);
 	const canvasSize: Coordinate = useAppSelector(
 		(state) => state.windowReducer.value.canvasSize
+	);
+	const windowWidth: number = useAppSelector(
+		(state) => state.windowReducer.value.windowWidth
+	);
+	const windowHeight: number = useAppSelector(
+		(state) => state.windowReducer.value.windowHeight
 	);
 	const isPlaying = useAppSelector((state) => state.audioReducer.value.isPlaying);
 	const seconds = useAppSelector((state) => state.audioReducer.value.seconds);
@@ -64,7 +74,7 @@ const PlaybackCanvas = () => {
 	return (
 		<canvas
 			id="playback-canvas"
-			className="pointer-events-none absolute inset-0 z-40 border-[3px] border-transparent bg-orange-200"
+			className="pointer-events-none absolute z-40 border-[3px] border-transparent"
 			ref={playbackCanvasRef}
 		></canvas>
 	);

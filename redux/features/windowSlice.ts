@@ -54,10 +54,10 @@ export const window = createSlice({
 	name: 'window',
 	initialState: initialState,
 	reducers: {
-		setHeight: (state, action: PayloadAction<number>) => {
+		setWindowHeight: (state, action: PayloadAction<number>) => {
 			state.value.windowHeight = action.payload;
 		},
-		setWidth: (state, action: PayloadAction<number>) => {
+		setWindowWidth: (state, action: PayloadAction<number>) => {
 			state.value.windowWidth = action.payload;
 		},
 		setMousePosition: (state, action: PayloadAction<Coordinate>) => {
@@ -116,8 +116,8 @@ export const window = createSlice({
 });
 
 export const {
-	setHeight,
-	setWidth,
+	setWindowHeight,
+	setWindowWidth,
 	setMousePosition,
 	setIsDragging,
 	setCanvasSize,

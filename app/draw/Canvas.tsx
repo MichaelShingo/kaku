@@ -17,31 +17,28 @@ import { calcSecondsFromPixels } from '../utils/pixelToAudioConversion';
 
 function App() {
 	const dispatch = useDispatch();
-
-	const [isDrawing, setIsDrawing] = useState<boolean>(false);
-	const canvasContainerRef = useRef<HTMLDivElement>(null);
 	const color = useAppSelector((state) => state.toolReducer.value.color);
 	const brushSize = useAppSelector((state) => state.toolReducer.value.brushSize);
 	const canvasSize = useAppSelector((state) => state.windowReducer.value.canvasSize);
 	const windowWidth = useAppSelector((state) => state.windowReducer.value.windowWidth);
-	const isMouseDown = useAppSelector((state) => state.windowReducer.value.isMouseDown);
 	const selectedTool = useAppSelector((state) => state.toolReducer.value.selectedTool);
 	const canvasZoom = useAppSelector((state) => state.windowReducer.value.canvasZoom);
 	const canvasScroll = useAppSelector((state) => state.windowReducer.value.canvasScroll);
-	const isCursorInCanvas = useAppSelector(
-		(state) => state.windowReducer.value.isCursorInCanvas
-	);
 	const selectedShape: Shape = useAppSelector(
 		(state) => state.toolReducer.value.selectedShape
 	);
 
-	const canvasRef = useRef<HTMLCanvasElement>(null);
+	const [isDrawing, setIsDrawing] = useState<boolean>(false);
 	const [canvasCTX, setCanvasCTX] = useState<CanvasRenderingContext2D | null>(null);
 	const [boundingRect, setBoundingRect] = useState<DOMRect | null>(null);
+	const [canvasBoundingRect, setCanvasBoundingRect] = useState<DOMRect | null>(null);
 	const [initialPosition, setInitialPosition] = useState<Coordinate>({ x: 0, y: 0 });
 	const isBrushTypeTool = selectedTool === 'eraser' || selectedTool === 'brush';
 	const isDrawingTool =
 		selectedTool === 'eraser' || selectedTool === 'brush' || selectedTool === 'shape';
+
+	const canvasContainerRef = useRef<HTMLDivElement>(null);
+	const canvasRef = useRef<HTMLCanvasElement>(null);
 
 	useEffect(() => {
 		const canvas = canvasRef.current;
@@ -60,9 +57,9 @@ function App() {
 	}, [canvasRef]);
 
 	useEffect(() => {
-		if (canvasContainerRef.current) {
-			console.log('setting bounding rect, window change');
+		if (canvasContainerRef.current && canvasRef.current) {
 			setBoundingRect(canvasContainerRef.current.getBoundingClientRect());
+			setCanvasBoundingRect(canvasRef.current.getBoundingClientRect());
 		}
 	}, [canvasSize, canvasZoom, windowWidth]);
 
@@ -157,7 +154,6 @@ function App() {
 			canvasCTX.lineCap = 'round';
 			canvasCTX.lineJoin = 'round';
 
-			console.log(e.clientX, e.clientY);
 			const offsetMousePosition: Coordinate = calculateMousePositionOffset({
 				x: e.clientX,
 				y: e.clientY,
@@ -255,44 +251,42 @@ function App() {
 		}
 	};
 	return (
-		<div className="h-[100vh] w-[100vw]">
-			<div
-				ref={canvasContainerRef}
-				className="relative flex h-[200%] w-[200%] items-center justify-center"
-			>
-				{/* <PlaybackCanvas /> */}
-				<canvas
-					id="canvas"
-					className="relative cursor-none border-[3px] border-off-black"
-					ref={canvasRef}
-					onMouseEnter={() => {
-						dispatch(setIsCursorInCanvas(true));
-					}}
-					onMouseLeave={() => {
-						dispatch(setIsCursorInCanvas(false));
-					}}
-					onMouseMove={(e) => {
-						draw(e);
-					}}
-					onMouseDown={(e) => {
-						startDrawing(e);
-						setInitialPosition(
-							calculateMousePositionOffset({ x: e.clientX, y: e.clientY })
-						);
-					}}
-					onMouseUp={(e) => {
-						drawShape(e);
-						stopDrawing();
-						if (isDrawingTool) {
-							dispatch(setIsAudioReady(false));
-						}
-					}}
-					onClick={handleClick}
-					style={{
-						transform: `scale(${canvasZoom}%)`,
-					}}
-				></canvas>
-			</div>
+		<div
+			ref={canvasContainerRef}
+			className="relative flex h-[200%] w-[200%] items-center justify-center"
+		>
+			<PlaybackCanvas boundingRect={boundingRect} />
+			<canvas
+				id="canvas"
+				className="relative cursor-none border-[3px] border-off-black"
+				ref={canvasRef}
+				onMouseEnter={() => {
+					dispatch(setIsCursorInCanvas(true));
+				}}
+				onMouseLeave={() => {
+					dispatch(setIsCursorInCanvas(false));
+				}}
+				onMouseMove={(e) => {
+					draw(e);
+				}}
+				onMouseDown={(e) => {
+					startDrawing(e);
+					setInitialPosition(
+						calculateMousePositionOffset({ x: e.clientX, y: e.clientY })
+					);
+				}}
+				onMouseUp={(e) => {
+					drawShape(e);
+					stopDrawing();
+					if (isDrawingTool) {
+						dispatch(setIsAudioReady(false));
+					}
+				}}
+				onClick={handleClick}
+				style={{
+					transform: `scale(${canvasZoom}%)`,
+				}}
+			></canvas>
 		</div>
 	);
 }

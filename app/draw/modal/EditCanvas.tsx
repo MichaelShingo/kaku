@@ -11,8 +11,8 @@ const EditCanvas = () => {
 	const canvasSize: Coordinate = useAppSelector(
 		(state) => state.windowReducer.value.canvasSize
 	);
-	const [canvasWidth, setCanvasWidth] = useState<number>(canvasSize.x);
-	const [canvasHeight, setCanvasHeight] = useState<number>(canvasSize.y);
+	const [canvasWidth, setCanvasWidth] = useState<number | string>(canvasSize.x);
+	const [canvasHeight, setCanvasHeight] = useState<number | string>(canvasSize.y);
 
 	const dispatch = useDispatch();
 
@@ -22,10 +22,12 @@ const EditCanvas = () => {
 		) as HTMLCanvasElement;
 		localStorage.setItem('canvasWidth', canvasWidth.toString());
 		localStorage.setItem('canvasHeight', canvasHeight.toString());
-		canvas.width = canvasWidth;
-		canvas.height = canvasHeight;
+		if (typeof canvasWidth === 'number' && typeof canvasHeight === 'number') {
+			canvas.width = canvasWidth;
+			canvas.height = canvasHeight;
+			dispatch(setCanvasSize({ x: canvasWidth, y: canvasHeight }));
+		}
 		loadLocalStorageImage();
-		dispatch(setCanvasSize({ x: canvasWidth, y: canvasHeight }));
 	};
 
 	const clearCanvas = () => {
@@ -37,7 +39,7 @@ const EditCanvas = () => {
 	return (
 		<div className="flex flex-col items-center gap-5">
 			<NumericInput
-				labelText="Canvas Width:"
+				labelText="Width:"
 				postLabel="px"
 				min={0}
 				max={10000}
@@ -47,7 +49,7 @@ const EditCanvas = () => {
 				}
 			/>
 			<NumericInput
-				labelText="Canvas Height:"
+				labelText="Height:"
 				postLabel="px"
 				min={0}
 				max={5000}

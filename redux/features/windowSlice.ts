@@ -39,8 +39,8 @@ const initialState = {
 		mousePosition: { x: 0, y: 0 },
 		isDragging: false,
 		canvasSize: {
-			x: parseInt(localStorage.getItem('canvasWidth')),
-			y: parseInt(localStorage.getItem('canvasHeight')),
+			x: 500,
+			y: 500,
 		},
 		canvasZoom: 100,
 		isMouseDown: false,

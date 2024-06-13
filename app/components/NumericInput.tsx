@@ -6,7 +6,7 @@ interface NumericInputProps {
 	postLabel?: string;
 	min: number;
 	max: number;
-	value: number;
+	value: number | string;
 	handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -22,7 +22,7 @@ const NumericInput: React.FC<NumericInputProps> = ({
 		<div className="flex flex-row gap-2">
 			<Label text={labelText} />
 			<input
-				className="h-fit w-fit rounded-md border-[2px] border-off-black text-center"
+				className="h-fit w-fit rounded-md border-[2px] border-off-black text-center shadow-sm transition duration-300 focus:border-light-blue"
 				type="number"
 				min={min}
 				max={max}

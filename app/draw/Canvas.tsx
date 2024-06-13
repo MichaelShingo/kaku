@@ -9,6 +9,7 @@ import {
 	Coordinate,
 	setIsCursorInCanvas,
 	setCanvasScroll,
+	setCanvasSize,
 } from '@/redux/features/windowSlice';
 import { Shape } from '@/redux/features/toolSlice';
 import { setIsAudioReady, setSeconds } from '@/redux/features/audioSlice';
@@ -42,6 +43,12 @@ function App() {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
 	useEffect(() => {
+		dispatch(
+			setCanvasSize({
+				x: parseInt(localStorage.getItem('canvasWidth')),
+				y: parseInt(localStorage.getItem('canvasHeight')),
+			})
+		);
 		const canvas = canvasRef.current;
 		if (canvas) {
 			const ctx = canvas.getContext('2d', { alpha: false });

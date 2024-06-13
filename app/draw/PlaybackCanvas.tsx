@@ -6,24 +6,16 @@ import { calcPixelsFromSeconds } from '../utils/pixelToAudioConversion';
 
 let isPlayingLocal: boolean = false;
 
-interface PlaybackCanvasProps {
-	boundingRect: DOMRect | null;
-}
+interface PlaybackCanvasProps {}
 
-const PlaybackCanvas: React.FC<PlaybackCanvasProps> = ({ boundingRect }) => {
-	const playbackCanvasRef = useRef<HTMLCanvasElement | null>(null);
+const PlaybackCanvas: React.FC<PlaybackCanvasProps> = () => {
 	const canvasSize: Coordinate = useAppSelector(
 		(state) => state.windowReducer.value.canvasSize
-	);
-	const windowWidth: number = useAppSelector(
-		(state) => state.windowReducer.value.windowWidth
-	);
-	const windowHeight: number = useAppSelector(
-		(state) => state.windowReducer.value.windowHeight
 	);
 	const isPlaying = useAppSelector((state) => state.audioReducer.value.isPlaying);
 	const seconds = useAppSelector((state) => state.audioReducer.value.seconds);
 	const [canvasCTX, setCanvasCTX] = useState<CanvasRenderingContext2D | null>(null);
+	const playbackCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
 	const clearCanvas = () => {
 		if (!canvasCTX) {
@@ -31,6 +23,7 @@ const PlaybackCanvas: React.FC<PlaybackCanvasProps> = ({ boundingRect }) => {
 		}
 		canvasCTX.clearRect(0, 0, canvasSize.x, canvasSize.y);
 	};
+
 	const drawPlaybackLine = (seconds: number): void => {
 		if (!canvasCTX) {
 			return;

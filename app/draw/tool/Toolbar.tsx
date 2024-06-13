@@ -73,7 +73,6 @@ const Toolbar = () => {
 	};
 
 	const editCanvas = () => {
-		console.log('new file');
 		dispatch(setIsModalOpen(true));
 		dispatch(setModalContent('Edit Canvas'));
 	};

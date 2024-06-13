@@ -8,6 +8,8 @@ import {
 import Label from './Label';
 import { useAppSelector } from '@/redux/store';
 import { useDispatch } from 'react-redux';
+import NumericInput from '@/app/components/NumericInput';
+import React from 'react';
 
 const BrushMenu = () => {
 	const dispatch = useDispatch();
@@ -32,27 +34,23 @@ const BrushMenu = () => {
 					value={brushSize}
 					onChange={(e) => dispatch(setBrushSize(parseInt(e.target.value)))}
 				/>
-				<input
-					className="h-fit w-fit rounded-md border-[2px] border-off-black text-center"
-					type="number"
+				<NumericInput
 					min={MIN_BRUSH_SIZE}
 					max={MAX_BRUSH_SIZE}
 					value={brushSize}
-					onChange={(e) => dispatch(setBrushSize(parseInt(e.target.value)))}
+					handleChange={(e) => dispatch(setBrushSize(parseInt(e.target.value)))}
+					postLabel="px"
 				/>
-				<Label text="px" />
 			</div>
 			<div className="flex flex-row items-center gap-2">
-				<Label text="Opacity:" />
-				<input
-					className="h-fit w-fit rounded-md border-[2px] border-off-black text-center"
-					type="number"
-					min="0"
-					max="100"
+				<NumericInput
+					labelText="Opacity:"
+					min={0}
+					max={100}
 					value={brushOpacity}
-					onChange={(e) => dispatch(setBrushOpacity(parseInt(e.target.value)))}
+					handleChange={(e) => dispatch(setBrushOpacity(parseInt(e.target.value)))}
+					postLabel="%"
 				/>
-				<Label text="%" />
 			</div>
 		</>
 	);

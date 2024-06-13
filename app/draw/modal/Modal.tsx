@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { setIsModalOpen } from '@/redux/features/windowSlice';
 import { COLORS } from '@/app/utils/colors';
 import SaveModal from './SaveModal';
+import EditCanvas from './EditCanvas';
 
 interface ModalProps {}
 
@@ -20,8 +21,10 @@ const Modal: React.FC<ModalProps> = () => {
 
 	const generateModalContent = () => {
 		switch (modalContent) {
-			case 'save':
+			case 'Save':
 				return <SaveModal />;
+			case 'Edit Canvas':
+				return <EditCanvas />;
 			default:
 				return <></>;
 		}
@@ -36,7 +39,7 @@ const Modal: React.FC<ModalProps> = () => {
 			}}
 		>
 			<div
-				className="fixed z-50 h-fit min-h-52 w-fit min-w-[40%] border-[4px] border-light-pink bg-off-white pb-5 transition-all"
+				className="fixed z-50 h-fit min-h-52 w-fit min-w-[300px] border-[4px] border-light-pink bg-off-white px-4 pb-5 transition-all"
 				style={{
 					transform: isModalOpen ? 'scale(100%)' : 'scale(50%)',
 				}}
@@ -56,6 +59,9 @@ const Modal: React.FC<ModalProps> = () => {
 						/>
 					</button>
 				</div>
+				<h2 className="pointer-events-none h-fit w-full -translate-y-7 text-center text-4xl">
+					{modalContent}
+				</h2>
 				{generateModalContent()}
 			</div>
 		</div>

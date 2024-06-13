@@ -12,7 +12,7 @@ type InitialState = {
 	value: WindowState;
 };
 
-export type ModalContent = 'save';
+type ModalContent = 'Save' | 'Edit Canvas';
 
 type WindowState = {
 	canvasCTX: CanvasRenderingContext2D | null;
@@ -28,7 +28,7 @@ type WindowState = {
 	currentHistoryIndex: number;
 	canvasScroll: Coordinate;
 	isModalOpen: boolean;
-	modalContent: string;
+	modalContent: ModalContent;
 };
 
 const initialState = {
@@ -46,7 +46,7 @@ const initialState = {
 		currentHistoryIndex: -1,
 		canvasScroll: { x: 0, y: 0 },
 		isModalOpen: false,
-		modalContent: 'save',
+		modalContent: 'Save',
 	} as WindowState,
 } as InitialState;
 
@@ -109,7 +109,7 @@ export const window = createSlice({
 		setIsModalOpen: (state, action: PayloadAction<boolean>) => {
 			state.value.isModalOpen = action.payload;
 		},
-		setModalContent: (state, action: PayloadAction<string>) => {
+		setModalContent: (state, action: PayloadAction<ModalContent>) => {
 			state.value.modalContent = action.payload;
 		},
 	},

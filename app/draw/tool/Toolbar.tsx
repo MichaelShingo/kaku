@@ -69,11 +69,13 @@ const Toolbar = () => {
 
 	const save = () => {
 		dispatch(setIsModalOpen(true));
-		dispatch(setModalContent('save'));
+		dispatch(setModalContent('Save'));
 	};
 
-	const createNewFile = () => {
+	const editCanvas = () => {
 		console.log('new file');
+		dispatch(setIsModalOpen(true));
+		dispatch(setModalContent('Edit Canvas'));
 	};
 
 	return (
@@ -93,7 +95,7 @@ const Toolbar = () => {
 				<FunctionButton id="undo" icon={faArrowLeft} handleClick={undo} />
 				<FunctionButton id="redo" icon={faArrowRight} handleClick={redo} />
 				<FunctionButton icon={faSave} handleClick={save} />
-				<FunctionButton icon={faFileCirclePlus} handleClick={createNewFile} />
+				<FunctionButton icon={faFileCirclePlus} handleClick={editCanvas} />
 				<input
 					className="h-11 w-11"
 					type="color"

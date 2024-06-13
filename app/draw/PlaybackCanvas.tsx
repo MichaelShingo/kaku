@@ -71,6 +71,14 @@ const PlaybackCanvas: React.FC<PlaybackCanvasProps> = ({ boundingRect }) => {
 		drawPlaybackLine(seconds);
 	}, [seconds]);
 
+	useEffect(() => {
+		const canvas = playbackCanvasRef.current;
+		if (canvas) {
+			canvas.width = canvasSize.x;
+			canvas.height = canvasSize.y;
+		}
+	}, [canvasSize]);
+
 	return (
 		<canvas
 			id="playback-canvas"

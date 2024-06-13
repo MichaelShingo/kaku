@@ -14,6 +14,7 @@ import { Shape } from '@/redux/features/toolSlice';
 import { setIsAudioReady, setSeconds } from '@/redux/features/audioSlice';
 import PlaybackCanvas from './PlaybackCanvas';
 import { calcSecondsFromPixels } from '../utils/pixelToAudioConversion';
+import { loadLocalStorageImage } from '../utils/canvasContext';
 
 function App() {
 	const dispatch = useDispatch();
@@ -44,13 +45,22 @@ function App() {
 		const canvas = canvasRef.current;
 		if (canvas) {
 			const ctx = canvas.getContext('2d', { alpha: false });
-			canvas.width = canvasSize.x;
-			canvas.height = canvasSize.y;
+			const savedCanvasWidth: number | null = parseInt(
+				localStorage.getItem('canvasWidth')
+			);
+			const savedCanvasHeight: number | null = parseInt(
+				localStorage.getItem('canvasHeight')
+			);
+			if (savedCanvasWidth && savedCanvasHeight) {
+				canvas.width = savedCanvasWidth;
+				canvas.height = savedCanvasHeight;
+			} else {
+				canvas.width = canvasSize.x;
+				canvas.height = canvasSize.y;
+			}
 			setCanvasCTX(ctx);
 			if (ctx) {
-				ctx.fillStyle = 'white';
-				ctx.fillRect(0, 0, canvasSize.x, canvasSize.y);
-				ctx.imageSmoothingEnabled = true;
+				loadLocalStorageImage();
 			}
 		}
 		addToHistory();
@@ -67,6 +77,7 @@ function App() {
 		if (canvasRef.current) {
 			const canvasData: string = canvasRef.current.toDataURL();
 			dispatch(appendCanvasHistory(canvasData));
+			localStorage.setItem('imageData', canvasData);
 		}
 	};
 

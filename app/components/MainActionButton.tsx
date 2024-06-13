@@ -14,7 +14,7 @@ const MainActionButton: React.FC<MainActionButtonProps> = ({
 		<>
 			{isActive ? (
 				<button
-					className="w-fit bg-light-pink px-5 py-[10px] text-off-white shadow-outer-sm transition-all hover:scale-105 hover:animate-color-shift hover:border-transparent active:shadow-inner-md"
+					className="w-fit min-w-48 bg-light-pink px-5 py-[10px] text-off-white shadow-outer-sm transition-all hover:scale-105 hover:animate-color-shift hover:border-transparent focus:scale-105 focus:border-none active:shadow-inner-md"
 					style={{
 						backgroundColor: isActive ? COLORS['light-pink'] : COLORS['light-grey'],
 					}}
@@ -26,7 +26,7 @@ const MainActionButton: React.FC<MainActionButtonProps> = ({
 				</button>
 			) : (
 				<button
-					className="w-fit cursor-default bg-light-grey px-5 py-[10px] text-off-white shadow-outer-sm"
+					className="w-fit min-w-48 cursor-default bg-light-grey px-5 py-[10px] text-off-white shadow-outer-sm"
 					style={{}}
 				>
 					{label}

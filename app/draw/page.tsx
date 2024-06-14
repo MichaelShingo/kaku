@@ -9,29 +9,47 @@ import ContextualMenu from './contextualMenu/ContextualMenu';
 import Modal from './modal/Modal';
 import WindowEvents from '../components/eventListeners/WindowEvents';
 import { useEffect, useRef } from 'react';
+import { CanvasSize } from '@/redux/features/windowSlice';
+import { useAppSelector } from '@/redux/store';
 
 export default function Home() {
 	const ref = useRef<HTMLDivElement | null>(null);
-
+	const canvasSize: CanvasSize = useAppSelector(
+		(state) => state.windowReducer.value.canvasSize
+	);
+	const windowWidth = useAppSelector((state) => state.windowReducer.value.windowWidth);
+	const windowHeight = useAppSelector((state) => state.windowReducer.value.windowHeight);
 	useEffect(() => {
 		if (ref.current) {
-			// console.log(ref.current.getBoundingClientRect());
+			const handleScroll = () => {
+				console.log(ref.current.scrollLeft, ref.current.scrollTop);
+			};
+			ref.current.addEventListener('scroll', handleScroll);
 		}
 	}, []);
 	return (
-		<div
-			ref={ref}
-			className="h-[100vh] w-[100vw] overflow-scroll bg-[url('/kakuBackdrop.svg')] bg-[size:200%] bg-no-repeat"
-		>
+		<>
 			<Modal />
-			<ShapePreview />
-			<ToolCursor />
-			<ContextualMenu />
-			<Toolbar />
-			<Canvas />
-			<KeyboardEvents />
-			<MouseEvents />
-			<WindowEvents />
-		</div>
+			<div
+				id="page-container"
+				ref={ref}
+				className="flex items-center justify-center bg-[url('/kakuBackdrop.svg')] bg-[size:100%] bg-no-repeat"
+				style={{
+					minHeight: windowHeight * 2,
+					minWidth: windowWidth * 2,
+					height: canvasSize.y * 2,
+					width: canvasSize.x * 2,
+				}}
+			>
+				<ShapePreview />
+				<ContextualMenu />
+				<Toolbar />
+				<Canvas />
+				<KeyboardEvents />
+				<MouseEvents />
+				<WindowEvents />
+				<ToolCursor />
+			</div>
+		</>
 	);
 }

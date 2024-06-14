@@ -269,11 +269,8 @@ function App() {
 		}
 	};
 	return (
-		<div
-			ref={canvasContainerRef}
-			className="relative flex h-[200%] w-[200%] items-center justify-center"
-		>
-			<PlaybackCanvas boundingRect={boundingRect} />
+		<div id="canvas container" ref={canvasContainerRef} className="relative h-fit w-fit">
+			<PlaybackCanvas />
 			<canvas
 				id="canvas"
 				className="relative cursor-none border-[3px] border-off-black"

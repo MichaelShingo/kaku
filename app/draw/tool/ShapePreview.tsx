@@ -37,7 +37,7 @@ const ShapePreview = () => {
 		if (selectedShape === 'rectangle' || selectedShape === 'circle') {
 			return (
 				<div
-					className="absolute z-50 pointer-events-none"
+					className="pointer-events-none fixed z-50"
 					style={{
 						left: `${initialPosition.x + 2.4}px`,
 						top: `${initialPosition.y + 2.6}px`,
@@ -51,7 +51,7 @@ const ShapePreview = () => {
 		} else if (selectedShape === 'triangle') {
 			return (
 				<div
-					className="absolute z-50 w-0 h-0 bg-transparent pointer-events-none"
+					className="pointer-events-none fixed z-50 h-0 w-0 bg-transparent"
 					style={{
 						left: `${initialPosition.x + 2.4}px`,
 						top: `${initialPosition.y + 2.6}px`,

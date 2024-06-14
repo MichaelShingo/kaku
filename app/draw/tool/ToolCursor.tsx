@@ -41,7 +41,7 @@ const ToolCursor = () => {
 			case 'eraser':
 				return (
 					<div
-						className="pointer-events-none absolute z-50 rounded-full border-2 opacity-50"
+						className="pointer-events-none fixed z-50 rounded-full border-2 opacity-50"
 						style={{
 							top: `${mousePosition.y}px`,
 							left: `${mousePosition.x}px`,
@@ -80,7 +80,7 @@ const IconCursor: React.FC<IconCursorProps> = ({ icon, size }) => {
 
 	return (
 		<div
-			className="pointer-events-none absolute z-50 flex h-14 w-14 items-center justify-center opacity-55"
+			className="pointer-events-none fixed z-50 flex h-14 w-14 items-center justify-center opacity-55"
 			style={{
 				top: `${mousePosition.y}px`,
 				left: `${mousePosition.x}px`,

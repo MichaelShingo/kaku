@@ -12,12 +12,12 @@ const silkscreen = Silkscreen({
 export const metadata: Metadata = {
 	title: 'Kaku | Draw Music',
 	description: 'Draw music and play it back',
-	metadataBase: new URL('https://portfolio.michaelshingo.com/'),
+	metadataBase: new URL('https://kaku.michaelshingo.com/'),
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
-		<html lang="en" className="overflow-hidden">
+		<html lang="en" className="overflow-scroll">
 			<body className={`${silkscreen.className}`}>
 				<ReduxProvider>{children}</ReduxProvider>
 				<Analytics />

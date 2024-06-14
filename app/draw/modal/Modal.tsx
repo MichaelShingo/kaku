@@ -46,7 +46,7 @@ const Modal: React.FC<ModalProps> = () => {
 			>
 				<div className="flex w-full justify-end">
 					<button
-						className="m-1 px-2 py-1 transition-all hover:bg-light-pink"
+						className="mt-1 translate-x-3 px-2 py-1 transition-all hover:bg-light-pink"
 						onClick={() => dispatch(setIsModalOpen(false))}
 						onMouseEnter={() => setIsXHovered(true)}
 						onMouseLeave={() => setIsXHovered(false)}

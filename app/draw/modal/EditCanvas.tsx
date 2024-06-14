@@ -11,22 +11,28 @@ const EditCanvas = () => {
 	const canvasSize: Coordinate = useAppSelector(
 		(state) => state.windowReducer.value.canvasSize
 	);
-	const [canvasWidth, setCanvasWidth] = useState<number | string>(canvasSize.x);
-	const [canvasHeight, setCanvasHeight] = useState<number | string>(canvasSize.y);
-
+	const [canvasWidth, setCanvasWidth] = useState<string>(canvasSize.x.toString());
+	const [canvasHeight, setCanvasHeight] = useState<string>(canvasSize.y.toString());
+	const [widthError, setWidthError] = useState<boolean>(false);
+	const [heightError, setHeightError] = useState<boolean>(false);
 	const dispatch = useDispatch();
 
 	const resizeCanvas = () => {
+		if (widthError || heightError) {
+			return;
+		}
+		setWidthError(false);
+		setHeightError(false);
 		const canvas: HTMLCanvasElement = document.getElementById(
 			'canvas'
 		) as HTMLCanvasElement;
 		localStorage.setItem('canvasWidth', canvasWidth.toString());
 		localStorage.setItem('canvasHeight', canvasHeight.toString());
-		if (typeof canvasWidth === 'number' && typeof canvasHeight === 'number') {
-			canvas.width = canvasWidth;
-			canvas.height = canvasHeight;
-			dispatch(setCanvasSize({ x: canvasWidth, y: canvasHeight }));
-		}
+		const canvasWidthNum = parseInt(canvasWidth);
+		const canvasHeightNum = parseInt(canvasHeight);
+		canvas.width = canvasWidthNum;
+		canvas.height = canvasHeightNum;
+		dispatch(setCanvasSize({ x: canvasWidthNum, y: canvasHeightNum }));
 		loadLocalStorageImage();
 	};
 
@@ -42,11 +48,14 @@ const EditCanvas = () => {
 				labelText="Width:"
 				postLabel="px"
 				min={0}
-				max={10000}
+				max={9999}
 				value={canvasWidth}
-				handleChange={(e) =>
-					e.target.value ? setCanvasWidth(parseInt(e.target.value)) : () => {}
-				}
+				handleChange={(e) => {
+					const val = e.target.value;
+					setCanvasWidth(val);
+					val === '' || val === '0' ? setWidthError(true) : setWidthError(false);
+				}}
+				error={widthError}
 			/>
 			<NumericInput
 				labelText="Height:"
@@ -54,9 +63,12 @@ const EditCanvas = () => {
 				min={0}
 				max={5000}
 				value={canvasHeight}
-				handleChange={(e) =>
-					e.target.value ? setCanvasHeight(parseInt(e.target.value)) : () => {}
-				}
+				handleChange={(e) => {
+					const val = e.target.value;
+					setCanvasHeight(val);
+					val === '' || val === '0' ? setHeightError(true) : setHeightError(false);
+				}}
+				error={heightError}
 			/>
 			<div className="flex flex-row gap-7">
 				<MainActionButton
@@ -66,7 +78,7 @@ const EditCanvas = () => {
 				/>
 				<MainActionButton
 					label="Resize Canvas"
-					isActive={true}
+					isActive={!(widthError || heightError) ? true : false}
 					handleClick={resizeCanvas}
 				/>
 			</div>

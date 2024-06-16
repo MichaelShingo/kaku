@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
-		<html lang="en" className="overflow-scroll">
+		<html id="page-container" lang="en" className="overflow-scroll">
 			<body className={`${silkscreen.className}`}>
 				<ReduxProvider>{children}</ReduxProvider>
 				<Analytics />

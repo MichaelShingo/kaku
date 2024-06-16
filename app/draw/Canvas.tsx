@@ -89,6 +89,8 @@ function App() {
 	};
 
 	const drawShape = (e: React.MouseEvent) => {
+		e.preventDefault();
+
 		if (selectedTool !== 'shape') {
 			return;
 		}
@@ -160,6 +162,7 @@ function App() {
 	};
 
 	const startDrawing = (e: React.MouseEvent) => {
+		e.preventDefault();
 		if (!isBrushTypeTool) {
 			return;
 		}
@@ -186,6 +189,8 @@ function App() {
 	};
 
 	const draw = (e: React.MouseEvent) => {
+		e.preventDefault();
+
 		const isLeftMouseButton = e.buttons === 1;
 		if (!isDrawing || !isLeftMouseButton || !isBrushTypeTool) {
 			return;
@@ -221,6 +226,7 @@ function App() {
 	};
 
 	const handleClick = (e: React.MouseEvent): void => {
+		e.preventDefault();
 		switch (selectedTool) {
 			case 'zoomIn':
 				dispatch(incrementCanvasZoom());

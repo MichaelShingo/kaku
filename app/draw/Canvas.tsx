@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { Ref, useEffect, useRef, useState } from 'react';
 import { useAppSelector } from '@/redux/store';
 import { useDispatch } from 'react-redux';
 import {
@@ -17,7 +17,11 @@ import PlaybackCanvas from './PlaybackCanvas';
 import { calcSecondsFromPixels } from '../utils/pixelToAudioConversion';
 import { loadLocalStorageImage } from '../utils/canvasContext';
 
-function App() {
+interface CanvasProps {
+	pageRef: React.RefObject<HTMLDivElement | null>;
+}
+
+const Canvas: React.FC<CanvasProps> = ({ pageRef }) => {
 	const dispatch = useDispatch();
 	const color = useAppSelector((state) => state.toolReducer.value.color);
 	const brushSize = useAppSelector((state) => state.toolReducer.value.brushSize);
@@ -29,12 +33,21 @@ function App() {
 	const selectedShape: Shape = useAppSelector(
 		(state) => state.toolReducer.value.selectedShape
 	);
+	const isMouseDown = useAppSelector((state) => state.windowReducer.value.isMouseDown);
+	const isCursorInCanvas = useAppSelector(
+		(state) => state.windowReducer.value.isCursorInCanvas
+	);
 
 	const [isDrawing, setIsDrawing] = useState<boolean>(false);
+	const [isDragging, setIsDragging] = useState<boolean>(false);
 	const [canvasCTX, setCanvasCTX] = useState<CanvasRenderingContext2D | null>(null);
 	const [boundingRect, setBoundingRect] = useState<DOMRect | null>(null);
 	const [canvasBoundingRect, setCanvasBoundingRect] = useState<DOMRect | null>(null);
 	const [initialPosition, setInitialPosition] = useState<Coordinate>({ x: 0, y: 0 });
+	const [initialPositionAbsolute, setInitialPositionAbsolute] = useState<Coordinate>({
+		x: 0,
+		y: 0,
+	});
 	const isBrushTypeTool = selectedTool === 'eraser' || selectedTool === 'brush';
 	const isDrawingTool =
 		selectedTool === 'eraser' || selectedTool === 'brush' || selectedTool === 'shape';
@@ -225,6 +238,22 @@ function App() {
 		addToHistory();
 	};
 
+	const drag = (e: React.MouseEvent) => {
+		if (pageRef.current && selectedTool === 'hand' && isMouseDown && isCursorInCanvas) {
+			const prevMousePosition: Coordinate = initialPositionAbsolute;
+			const leftOffset = e.clientX - prevMousePosition.x;
+			const topOffset = e.clientY - prevMousePosition.y;
+			prevMousePosition.x += leftOffset;
+			prevMousePosition.y += topOffset;
+			const currentLeft = pageRef.current.scrollLeft;
+			const currentTop = pageRef.current.scrollTop;
+			pageRef.current.scrollTo({
+				left: currentLeft - leftOffset,
+				top: currentTop - topOffset,
+			});
+		}
+	};
+
 	const handleClick = (e: React.MouseEvent): void => {
 		e.preventDefault();
 		switch (selectedTool) {
@@ -289,12 +318,14 @@ function App() {
 				}}
 				onMouseMove={(e) => {
 					draw(e);
+					drag(e);
 				}}
 				onMouseDown={(e) => {
 					startDrawing(e);
 					setInitialPosition(
 						calculateMousePositionOffset({ x: e.clientX, y: e.clientY })
 					);
+					setInitialPositionAbsolute({ x: e.clientX, y: e.clientY });
 				}}
 				onMouseUp={(e) => {
 					drawShape(e);
@@ -310,6 +341,6 @@ function App() {
 			></canvas>
 		</div>
 	);
-}
+};
 
-export default App;
+export default Canvas;

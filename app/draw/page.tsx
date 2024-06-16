@@ -40,7 +40,7 @@ export default function Home() {
 				<ShapePreview />
 				<ContextualMenu />
 				<Toolbar />
-				<Canvas />
+				<Canvas pageRef={ref} />
 				<KeyboardEvents />
 				<MouseEvents />
 				<WindowEvents />

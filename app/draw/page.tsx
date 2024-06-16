@@ -24,13 +24,15 @@ export default function Home() {
 	});
 
 	return (
-		<div ref={ref} className="h-screen w-screen overflow-scroll">
+		<div
+			ref={ref}
+			className="ml-14 mt-14 h-screen w-screen overflow-scroll"
+			style={{ width: `${windowWidth - 56}px`, height: `${windowHeight - 56}px` }}
+		>
 			<Modal />
 			<div
 				className="flex items-center justify-center bg-[url('/kakuBackdrop.svg')] bg-[size:100%] bg-no-repeat"
 				style={{
-					minHeight: windowHeight * 2,
-					minWidth: windowWidth * 2,
 					width: `${windowWidth * 2}px`,
 					height: `${windowHeight * 2}px`,
 				}}

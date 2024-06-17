@@ -17,55 +17,16 @@ import {
 	IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
 import { setColor, setSelectedTool, Tool } from '@/redux/features/toolSlice';
-import { getCanvasContext } from '../../utils/canvasContext';
-import {
-	setCurrentHistoryIndex,
-	setIsModalOpen,
-	setModalContent,
-} from '@/redux/features/windowSlice';
+import { setIsModalOpen, setModalContent } from '@/redux/features/windowSlice';
 import { COLORS } from '@/app/utils/colors';
-import { setIsAudioReady } from '@/redux/features/audioSlice';
+import useActions from '@/app/customHooks/useActions';
 
 const Toolbar = () => {
 	const dispatch = useDispatch();
-
+	const { undo, redo } = useActions();
 	const color = useAppSelector((state) => {
 		return state.toolReducer.value.color;
 	});
-	const canvasHistory: string[] = useAppSelector(
-		(state) => state.windowReducer.value.canvasHistory
-	);
-	const currentHistoryIndex: number = useAppSelector(
-		(state) => state.windowReducer.value.currentHistoryIndex
-	);
-
-	const undo = () => {
-		if (currentHistoryIndex === 0) {
-			return;
-		}
-		dispatch(setIsAudioReady(false));
-		const ctx: CanvasRenderingContext2D = getCanvasContext();
-		const canvasImage: HTMLImageElement = new Image();
-		canvasImage.src = canvasHistory[currentHistoryIndex - 1];
-		canvasImage.onload = () => {
-			ctx.drawImage(canvasImage, 0, 0);
-		};
-		dispatch(setCurrentHistoryIndex(currentHistoryIndex - 1));
-	};
-
-	const redo = () => {
-		if (currentHistoryIndex >= canvasHistory.length - 1) {
-			return;
-		}
-		dispatch(setIsAudioReady(false));
-		const ctx: CanvasRenderingContext2D = getCanvasContext();
-		const canvasImage: HTMLImageElement = new Image();
-		canvasImage.src = canvasHistory[currentHistoryIndex + 1];
-		canvasImage.onload = () => {
-			ctx.drawImage(canvasImage, 0, 0);
-		};
-		dispatch(setCurrentHistoryIndex(currentHistoryIndex + 1));
-	};
 
 	const save = () => {
 		dispatch(setIsModalOpen(true));
@@ -117,7 +78,6 @@ const ToolButton: React.FC<ToolButtonProps> = ({ toolName, icon }) => {
 	const selectedTool = useAppSelector((state) => state.toolReducer.value.selectedTool);
 	const isLoading = useAppSelector((state) => state.audioReducer.value.isLoading);
 	const isPlaying = useAppSelector((state) => state.audioReducer.value.isPlaying);
-	// const [isHovered, setIsHovered] = useState<boolean>(false);
 
 	const dispatch = useDispatch();
 	const isActive: boolean = toolName === selectedTool;
@@ -133,8 +93,6 @@ const ToolButton: React.FC<ToolButtonProps> = ({ toolName, icon }) => {
 			onClick={() => {
 				isDisabled ? () => {} : dispatch(setSelectedTool(toolName));
 			}}
-			// onMouseEnter={() => setIsHovered(true)}
-			// onMouseLeave={() => setIsHovered(false)}
 		>
 			<FontAwesomeIcon
 				className="bg-none transition-all hover:opacity-70"

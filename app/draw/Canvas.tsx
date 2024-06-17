@@ -1,5 +1,5 @@
 'use client';
-import React, { Ref, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAppSelector } from '@/redux/store';
 import { useDispatch } from 'react-redux';
 import {
@@ -8,8 +8,8 @@ import {
 	incrementCanvasZoom,
 	Coordinate,
 	setIsCursorInCanvas,
-	setCanvasScroll,
 	setCanvasSize,
+	setCurrentHistoryIndex,
 } from '@/redux/features/windowSlice';
 import { Shape } from '@/redux/features/toolSlice';
 import { setIsAudioReady, setSeconds } from '@/redux/features/audioSlice';
@@ -26,6 +26,12 @@ const Canvas: React.FC<CanvasProps> = ({ pageRef }) => {
 	const color = useAppSelector((state) => state.toolReducer.value.color);
 	const brushSize = useAppSelector((state) => state.toolReducer.value.brushSize);
 	const canvasSize = useAppSelector((state) => state.windowReducer.value.canvasSize);
+	const canvasHistory = useAppSelector(
+		(state) => state.windowReducer.value.canvasHistory
+	);
+	const currentHistoryIndex: number = useAppSelector(
+		(state) => state.windowReducer.value.currentHistoryIndex
+	);
 	const windowWidth = useAppSelector((state) => state.windowReducer.value.windowWidth);
 	const selectedTool = useAppSelector((state) => state.toolReducer.value.selectedTool);
 	const canvasZoom = useAppSelector((state) => state.windowReducer.value.canvasZoom);
@@ -39,10 +45,8 @@ const Canvas: React.FC<CanvasProps> = ({ pageRef }) => {
 	);
 
 	const [isDrawing, setIsDrawing] = useState<boolean>(false);
-	const [isDragging, setIsDragging] = useState<boolean>(false);
 	const [canvasCTX, setCanvasCTX] = useState<CanvasRenderingContext2D | null>(null);
 	const [boundingRect, setBoundingRect] = useState<DOMRect | null>(null);
-	const [canvasBoundingRect, setCanvasBoundingRect] = useState<DOMRect | null>(null);
 	const [initialPosition, setInitialPosition] = useState<Coordinate>({ x: 0, y: 0 });
 	const [initialPositionAbsolute, setInitialPositionAbsolute] = useState<Coordinate>({
 		x: 0,
@@ -89,15 +93,16 @@ const Canvas: React.FC<CanvasProps> = ({ pageRef }) => {
 	useEffect(() => {
 		if (canvasContainerRef.current && canvasRef.current) {
 			setBoundingRect(canvasContainerRef.current.getBoundingClientRect());
-			setCanvasBoundingRect(canvasRef.current.getBoundingClientRect());
 		}
 	}, [canvasSize, canvasZoom, windowWidth]);
 
 	const addToHistory = () => {
 		if (canvasRef.current) {
+			console.log('add to history');
 			const canvasData: string = canvasRef.current.toDataURL();
 			dispatch(appendCanvasHistory(canvasData));
 			localStorage.setItem('imageData', canvasData);
+			dispatch(setCurrentHistoryIndex(currentHistoryIndex + 1));
 		}
 	};
 
@@ -170,7 +175,6 @@ const Canvas: React.FC<CanvasProps> = ({ pageRef }) => {
 				default:
 					break;
 			}
-			addToHistory();
 		}
 	};
 
@@ -179,7 +183,6 @@ const Canvas: React.FC<CanvasProps> = ({ pageRef }) => {
 		if (!isBrushTypeTool) {
 			return;
 		}
-		console.log('start drawing');
 
 		setIsDrawing(true);
 		if (canvasCTX && boundingRect) {
@@ -231,7 +234,6 @@ const Canvas: React.FC<CanvasProps> = ({ pageRef }) => {
 		if (!isDrawingTool) {
 			return;
 		}
-		console.log('stop drawing');
 
 		setIsDrawing(false);
 		canvasCTX?.beginPath();
@@ -293,16 +295,6 @@ const Canvas: React.FC<CanvasProps> = ({ pageRef }) => {
 		return { x: 0, y: 0 };
 	};
 
-	const handleScroll = () => {
-		if (canvasContainerRef.current) {
-			dispatch(
-				setCanvasScroll({
-					x: canvasContainerRef.current.scrollLeft,
-					y: canvasContainerRef.current.scrollTop,
-				})
-			);
-		}
-	};
 	return (
 		<div id="canvas container" ref={canvasContainerRef} className="relative h-fit w-fit">
 			<PlaybackCanvas />

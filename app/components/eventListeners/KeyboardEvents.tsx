@@ -50,12 +50,16 @@ const KeyboardEvents = () => {
 					}
 					break;
 				case 'y':
-					redo();
+					if (e.ctrlKey) {
+						redo();
+					}
 					break;
 				case 'z':
 					e.preventDefault();
-					if (e.ctrlKey) {
-						console.log('undo');
+					if (e.ctrlKey && e.shiftKey) {
+						redo();
+						break;
+					} else if (e.ctrlKey) {
 						undo();
 					} else {
 						dispatch(setSelectedTool('zoomIn'));
@@ -93,13 +97,14 @@ const KeyboardEvents = () => {
 
 		window.addEventListener('keydown', handleKeydown);
 		window.addEventListener('keyup', handleKeyUp);
+
 		return () => {
 			window.removeEventListener('keydown', handleKeydown);
 			window.removeEventListener('keyup', handleKeyUp);
 		};
-	}, [prevTool, selectedTool]);
+	}, [undo, redo, dispatch, selectedTool, prevTool, isKeyDepressed]);
 
-	return null;
+	return <></>;
 };
 
 export default KeyboardEvents;

@@ -92,12 +92,9 @@ const Canvas: React.FC<CanvasProps> = ({ pageRef }) => {
 
 	const drawShape = (e: React.MouseEvent) => {
 		e.preventDefault();
-
 		if (selectedTool !== 'shape') {
 			return;
 		}
-		console.log('draw shape');
-
 		const ctx = canvasCTX;
 		const canvasContainer = canvasContainerRef.current;
 		const finalPosition: Coordinate = calculateMousePositionOffset({
@@ -117,18 +114,26 @@ const Canvas: React.FC<CanvasProps> = ({ pageRef }) => {
 					);
 					break;
 				case 'circle': {
-					let radiusX = (finalPosition.x - initialPosition.x) / 2;
-					let radiusY = (finalPosition.y - initialPosition.y) / 2;
-					if (radiusX < 0) {
-						// this calculation must be adjusted
-						radiusX = (initialPosition.x - finalPosition.x) / 2;
-					}
-					if (radiusY < 0) {
-						radiusY = (initialPosition.y - finalPosition.y) / 2;
-					}
+					const mousePositionXDiff = finalPosition.x - initialPosition.x;
+					const mousePositionYDiff = finalPosition.y - initialPosition.y;
+					const radiusX: number =
+						(mousePositionXDiff < 0
+							? initialPosition.x - finalPosition.x
+							: mousePositionXDiff) / 2;
+					const radiusY: number =
+						(mousePositionYDiff < 0
+							? initialPosition.y - finalPosition.y
+							: mousePositionYDiff) / 2;
+
 					const ellipseCenter: Coordinate = {
-						x: finalPosition.x - radiusX,
-						y: finalPosition.y - radiusY,
+						x:
+							mousePositionXDiff < 0
+								? finalPosition.x + radiusX
+								: finalPosition.x - radiusX,
+						y:
+							mousePositionYDiff < 0
+								? finalPosition.y + radiusY
+								: finalPosition.y - radiusY,
 					};
 					ctx.beginPath();
 					ctx.ellipse(

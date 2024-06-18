@@ -16,11 +16,7 @@ const ShapePreview = () => {
 		(state) => state.windowReducer.value.isCursorInCanvas
 	);
 	const isShapePreviewVisible: boolean =
-		isMouseDown &&
-		isCursorInCanvas &&
-		selectedTool === 'shape' &&
-		mousePosition.x - initialPosition.x > 0 &&
-		mousePosition.y - initialPosition.y > 0;
+		isMouseDown && isCursorInCanvas && selectedTool === 'shape';
 
 	useEffect(() => {
 		if (isMouseDown) {
@@ -34,15 +30,27 @@ const ShapePreview = () => {
 		if (!isShapePreviewVisible) {
 			return <></>;
 		}
+
+		const mousePositionXDiff = mousePosition.x - initialPosition.x;
+		const mousePositionYDiff = mousePosition.y - initialPosition.y;
+		const width: number =
+			mousePositionXDiff < 0 ? initialPosition.x - mousePosition.x : mousePositionXDiff;
+		const height: number =
+			mousePositionYDiff < 0 ? initialPosition.y - mousePosition.y : mousePositionYDiff;
+
 		if (selectedShape === 'rectangle' || selectedShape === 'circle') {
 			return (
 				<div
 					className="pointer-events-none fixed z-50"
 					style={{
-						left: `${initialPosition.x + 2.4}px`,
-						top: `${initialPosition.y + 2.6}px`,
-						width: `${mousePosition.x - initialPosition.x}px`,
-						height: `${mousePosition.y - initialPosition.y}px`,
+						left: `${
+							mousePositionXDiff < 0 ? mousePosition.x + 2.4 : initialPosition.x + 2.4
+						}px`,
+						top: `${
+							mousePositionYDiff < 0 ? mousePosition.y + 2.6 : initialPosition.y + 2.6
+						}px`,
+						width: `${width}px`,
+						height: `${height}px`,
 						borderRadius: selectedShape === 'circle' ? '100%' : '0%',
 						backgroundColor: selectedColor,
 					}}
@@ -53,17 +61,18 @@ const ShapePreview = () => {
 				<div
 					className="pointer-events-none fixed z-50 h-0 w-0 bg-transparent"
 					style={{
-						left: `${initialPosition.x + 2.4}px`,
-						top: `${initialPosition.y + 2.6}px`,
-						borderLeft: `${
-							(mousePosition.x - initialPosition.x) / 2
-						}px solid transparent`,
-						borderRight: `${
-							(mousePosition.x - initialPosition.x) / 2
-						}px solid transparent`,
-						borderBottom: `${
-							mousePosition.y - initialPosition.y
-						}px solid ${selectedColor}`,
+						left: `${
+							mousePositionXDiff < 0 ? mousePosition.x + 2.4 : initialPosition.x + 2.4
+						}px`,
+						top: `${
+							mousePositionYDiff < 0 ? mousePosition.y + 2.6 : initialPosition.y + 2.6
+						}px`,
+						borderLeft: `${width / 2}px solid transparent`,
+						borderRight: `${width / 2}px solid transparent`,
+						borderBottom:
+							mousePositionYDiff < 0 ? 'none' : `${height}px solid ${selectedColor}`,
+						borderTop:
+							mousePositionYDiff > 0 ? 'none' : `${height}px solid ${selectedColor}`,
 					}}
 				></div>
 			);

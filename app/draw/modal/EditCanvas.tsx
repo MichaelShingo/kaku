@@ -1,6 +1,7 @@
 'use client';
 import MainActionButton from '@/app/components/MainActionButton';
 import NumericInput from '@/app/components/NumericInput';
+import useActions from '@/app/customHooks/useActions';
 import { getCanvasContext, loadLocalStorageImage } from '@/app/utils/canvasContext';
 import { Coordinate, setCanvasSize } from '@/redux/features/windowSlice';
 import { useAppSelector } from '@/redux/store';
@@ -8,6 +9,7 @@ import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 const EditCanvas = () => {
+	const { addToHistory } = useActions();
 	const canvasSize: Coordinate = useAppSelector(
 		(state) => state.windowReducer.value.canvasSize
 	);
@@ -40,6 +42,7 @@ const EditCanvas = () => {
 		const ctx: CanvasRenderingContext2D = getCanvasContext();
 		ctx.fillStyle = 'white';
 		ctx.fillRect(0, 0, canvasSize.x, canvasSize.y);
+		addToHistory();
 	};
 
 	return (

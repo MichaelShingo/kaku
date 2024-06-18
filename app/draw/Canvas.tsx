@@ -3,19 +3,18 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useAppSelector } from '@/redux/store';
 import { useDispatch } from 'react-redux';
 import {
-	appendCanvasHistory,
 	decrementCanvasZoom,
 	incrementCanvasZoom,
 	Coordinate,
 	setIsCursorInCanvas,
 	setCanvasSize,
-	setCurrentHistoryIndex,
 } from '@/redux/features/windowSlice';
 import { Shape } from '@/redux/features/toolSlice';
 import { setIsAudioReady, setSeconds } from '@/redux/features/audioSlice';
 import PlaybackCanvas from './PlaybackCanvas';
 import { calcSecondsFromPixels } from '../utils/pixelToAudioConversion';
 import { loadLocalStorageImage } from '../utils/canvasContext';
+import useActions from '../customHooks/useActions';
 
 interface CanvasProps {
 	pageRef: React.RefObject<HTMLDivElement | null>;
@@ -23,15 +22,10 @@ interface CanvasProps {
 
 const Canvas: React.FC<CanvasProps> = ({ pageRef }) => {
 	const dispatch = useDispatch();
+	const { addToHistory } = useActions();
 	const color = useAppSelector((state) => state.toolReducer.value.color);
 	const brushSize = useAppSelector((state) => state.toolReducer.value.brushSize);
 	const canvasSize = useAppSelector((state) => state.windowReducer.value.canvasSize);
-	const canvasHistory = useAppSelector(
-		(state) => state.windowReducer.value.canvasHistory
-	);
-	const currentHistoryIndex: number = useAppSelector(
-		(state) => state.windowReducer.value.currentHistoryIndex
-	);
 	const windowWidth = useAppSelector((state) => state.windowReducer.value.windowWidth);
 	const selectedTool = useAppSelector((state) => state.toolReducer.value.selectedTool);
 	const canvasZoom = useAppSelector((state) => state.windowReducer.value.canvasZoom);
@@ -95,16 +89,6 @@ const Canvas: React.FC<CanvasProps> = ({ pageRef }) => {
 			setBoundingRect(canvasContainerRef.current.getBoundingClientRect());
 		}
 	}, [canvasSize, canvasZoom, windowWidth]);
-
-	const addToHistory = () => {
-		if (canvasRef.current) {
-			console.log('add to history');
-			const canvasData: string = canvasRef.current.toDataURL();
-			dispatch(appendCanvasHistory(canvasData));
-			localStorage.setItem('imageData', canvasData);
-			dispatch(setCurrentHistoryIndex(currentHistoryIndex + 1));
-		}
-	};
 
 	const drawShape = (e: React.MouseEvent) => {
 		e.preventDefault();

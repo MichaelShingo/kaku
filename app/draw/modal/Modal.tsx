@@ -8,6 +8,7 @@ import { setIsModalOpen } from '@/redux/features/windowSlice';
 import { COLORS } from '@/app/utils/colors';
 import SaveModal from './SaveModal';
 import EditCanvas from './EditCanvas';
+import UploadModal from './UploadModal';
 
 interface ModalProps {}
 
@@ -25,6 +26,8 @@ const Modal: React.FC<ModalProps> = () => {
 				return <SaveModal />;
 			case 'Edit Canvas':
 				return <EditCanvas />;
+			case 'Upload':
+				return <UploadModal />;
 			default:
 				return <></>;
 		}
@@ -37,12 +40,14 @@ const Modal: React.FC<ModalProps> = () => {
 				opacity: isModalOpen ? '100%' : '0%',
 				pointerEvents: isModalOpen ? 'all' : 'none',
 			}}
+			onClick={() => dispatch(setIsModalOpen(false))}
 		>
 			<div
 				className="fixed z-50 h-fit min-h-52 w-fit min-w-[300px] border-[4px] border-light-pink bg-off-white px-4 pb-5 transition-all"
 				style={{
 					transform: isModalOpen ? 'scale(100%)' : 'scale(50%)',
 				}}
+				onClick={(e) => e.stopPropagation()}
 			>
 				<div className="flex w-full justify-end">
 					<button

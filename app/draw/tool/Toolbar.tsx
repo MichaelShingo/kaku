@@ -14,12 +14,15 @@ import {
 	faArrowRight,
 	faSave,
 	faFileCirclePlus,
+	faPenToSquare,
+	faArrowUpFromBracket,
 	IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
 import { setColor, setSelectedTool, Tool } from '@/redux/features/toolSlice';
 import { setIsModalOpen, setModalContent } from '@/redux/features/windowSlice';
 import { COLORS } from '@/app/utils/colors';
 import useActions from '@/app/customHooks/useActions';
+import { ChangeEvent } from 'react';
 
 const Toolbar = () => {
 	const dispatch = useDispatch();
@@ -36,6 +39,11 @@ const Toolbar = () => {
 	const editCanvas = () => {
 		dispatch(setIsModalOpen(true));
 		dispatch(setModalContent('Edit Canvas'));
+	};
+
+	const upload = () => {
+		dispatch(setIsModalOpen(true));
+		dispatch(setModalContent('Upload'));
 	};
 
 	return (
@@ -55,7 +63,9 @@ const Toolbar = () => {
 				<FunctionButton id="undo" icon={faArrowLeft} handleClick={undo} />
 				<FunctionButton id="redo" icon={faArrowRight} handleClick={redo} />
 				<FunctionButton icon={faSave} handleClick={save} />
-				<FunctionButton icon={faFileCirclePlus} handleClick={editCanvas} />
+				<FunctionButton icon={faPenToSquare} handleClick={editCanvas} />
+				<FunctionButton icon={faArrowUpFromBracket} handleClick={upload} />
+
 				<input
 					className="h-11 w-11"
 					type="color"

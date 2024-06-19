@@ -12,7 +12,7 @@ type InitialState = {
 	value: WindowState;
 };
 
-type ModalContent = 'Save' | 'Edit Canvas';
+type ModalContent = 'Save' | 'Edit Canvas' | 'Upload';
 
 type WindowState = {
 	canvasCTX: CanvasRenderingContext2D | null;

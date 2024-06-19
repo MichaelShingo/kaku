@@ -111,3 +111,62 @@ input[type='range']:hover::-moz-range-thumb {
 	outline: 3px solid #053a5f;
 	outline-offset: 0.125rem;
 }
+
+:root {
+	--form-control-color: rebeccapurple;
+}
+
+*,
+*:before,
+*:after {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+}
+
+form {
+	display: grid;
+	place-content: center;
+	min-height: 100vh;
+}
+
+.form-control {
+	font-family: system-ui, sans-serif;
+	font-size: 2rem;
+	font-weight: bold;
+	line-height: 1.1;
+	display: grid;
+	grid-template-columns: 1em auto;
+	gap: 0.5em;
+}
+
+.form-control + .form-control {
+	margin-top: 1em;
+}
+
+.form-control:focus-within {
+	color: #d972ff;
+}
+
+input[type='radio'] {
+	/* -webkit-appearance: none; */
+}
+
+input[type='radio']::before {
+	content: '';
+	width: 0.65em;
+	height: 0.65em;
+	transform: scale(0);
+	transition: 120ms transform ease-in-out;
+	box-shadow: inset 1em 1em #d972ff;
+	background-color: #d972ff;
+}
+
+input[type='radio']:checked::before {
+	transform: scale(1.6);
+}
+
+input[type='radio']:focus {
+}

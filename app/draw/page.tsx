@@ -31,7 +31,7 @@ export default function Home() {
 		>
 			<Modal />
 			<div
-				className="flex items-center justify-center bg-[url('/kakuBackdrop.svg')] bg-[size:100%] bg-no-repeat"
+				className="bg-[size:12 0%] flex items-center justify-center bg-[url('/kakuBackdrop.svg')] bg-no-repeat"
 				style={{
 					width: `${windowWidth * 2}px`,
 					height: `${windowHeight * 2}px`,

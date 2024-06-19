@@ -19,3 +19,15 @@ export const loadLocalStorageImage = () => {
 		img.src = savedImageData;
 	}
 };
+
+export const setLocalStorageImage = (imageUrl: string) => {
+	localStorage.setItem('imageData', imageUrl);
+};
+
+export const setLocalStorageCanvasSize = (
+	width: number | string,
+	height: number | string
+) => {
+	localStorage.setItem('canvasWidth', width.toString());
+	localStorage.setItem('canvasHeight', height.toString());
+};

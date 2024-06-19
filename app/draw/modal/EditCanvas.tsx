@@ -2,7 +2,11 @@
 import MainActionButton from '@/app/components/MainActionButton';
 import NumericInput from '@/app/components/NumericInput';
 import useActions from '@/app/customHooks/useActions';
-import { getCanvasContext, loadLocalStorageImage } from '@/app/utils/canvasContext';
+import {
+	getCanvasContext,
+	loadLocalStorageImage,
+	setLocalStorageCanvasSize,
+} from '@/app/utils/canvasContext';
 import { Coordinate, setCanvasSize } from '@/redux/features/windowSlice';
 import { useAppSelector } from '@/redux/store';
 import { useState } from 'react';
@@ -28,8 +32,7 @@ const EditCanvas = () => {
 		const canvas: HTMLCanvasElement = document.getElementById(
 			'canvas'
 		) as HTMLCanvasElement;
-		localStorage.setItem('canvasWidth', canvasWidth.toString());
-		localStorage.setItem('canvasHeight', canvasHeight.toString());
+		setLocalStorageCanvasSize(canvasWidth, canvasHeight);
 		const canvasWidthNum = parseInt(canvasWidth);
 		const canvasHeightNum = parseInt(canvasHeight);
 		canvas.width = canvasWidthNum;

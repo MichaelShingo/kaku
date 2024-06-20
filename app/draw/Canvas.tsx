@@ -13,7 +13,7 @@ import { Shape } from '@/redux/features/toolSlice';
 import { setIsAudioReady, setSeconds } from '@/redux/features/audioSlice';
 import PlaybackCanvas from './PlaybackCanvas';
 import { calcSecondsFromPixels } from '../utils/pixelToAudioConversion';
-import { loadLocalStorageImage } from '../utils/canvasContext';
+import { loadLocalStorageImage, setLocalStorageCanvasSize } from '../utils/canvasContext';
 import useActions from '../customHooks/useActions';
 
 interface CanvasProps {
@@ -54,41 +54,46 @@ const Canvas: React.FC<CanvasProps> = ({ pageRef }) => {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
 	useEffect(() => {
-		dispatch(
-			setCanvasSize({
-				x: parseInt(localStorage.getItem('canvasWidth')),
-				y: parseInt(localStorage.getItem('canvasHeight')),
-			})
-		);
 		const canvas = canvasRef.current;
-		if (canvas) {
-			const ctx = canvas.getContext('2d', { alpha: false });
-			const savedCanvasWidth: number | null = parseInt(
-				localStorage.getItem('canvasWidth')
+		const savedCanvasWidth: number | null = parseInt(localStorage.getItem('canvasWidth'));
+		const savedCanvasHeight: number | null = parseInt(
+			localStorage.getItem('canvasHeight')
+		);
+		console.log(savedCanvasWidth, savedCanvasHeight);
+		if (savedCanvasWidth && savedCanvasHeight) {
+			dispatch(
+				setCanvasSize({
+					x: parseInt(localStorage.getItem('canvasWidth')),
+					y: parseInt(localStorage.getItem('canvasHeight')),
+				})
 			);
-			const savedCanvasHeight: number | null = parseInt(
-				localStorage.getItem('canvasHeight')
-			);
-			if (savedCanvasWidth && savedCanvasHeight) {
-				canvas.width = savedCanvasWidth;
-				canvas.height = savedCanvasHeight;
-			} else {
-				canvas.width = canvasSize.x;
-				canvas.height = canvasSize.y;
-			}
-			setCanvasCTX(ctx);
-			if (ctx) {
-				loadLocalStorageImage();
-			}
 		}
-		addToHistory();
-	}, [canvasRef]);
+		canvas.width = canvasSize.x;
+		canvas.height = canvasSize.y;
+
+		const ctx = canvas.getContext('2d', { willReadFrequently: true, alpha: false });
+
+		setCanvasCTX(ctx);
+		if (ctx) {
+			loadLocalStorageImage();
+		}
+		console.log('add to history initial load');
+		// addToHistory();
+	}, []);
 
 	useEffect(() => {
 		if (canvasContainerRef.current && canvasRef.current) {
 			setBoundingRect(canvasContainerRef.current.getBoundingClientRect());
 		}
 	}, [canvasSize, canvasZoom, windowWidth]);
+
+	useEffect(() => {
+		const canvas = canvasRef.current;
+		canvas.width = canvasSize.x;
+		canvas.height = canvasSize.y;
+		setLocalStorageCanvasSize(canvasSize.x, canvasSize.y);
+		loadLocalStorageImage();
+	}, [canvasSize]);
 
 	const drawShape = (e: React.MouseEvent) => {
 		e.preventDefault();

@@ -1,20 +1,15 @@
-import {
-	getCanvasContext,
-	setLocalStorageCanvasSize,
-	setLocalStorageImage,
-} from '@/app/utils/canvasContext';
+import { getCanvasContext, setLocalStorageImage } from '@/app/utils/canvasContext';
 import { setCanvasSize } from '@/redux/features/windowSlice';
-import { useAppSelector } from '@/redux/store';
 import React, { ChangeEvent, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 const UploadModal: React.FC = () => {
 	const dispatch = useDispatch();
-	const canvasSize = useAppSelector((state) => state.windowReducer.value.canvasSize);
 
 	const [placement, setPlacement] = useState<string>('place-existing');
 
 	const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+		console.log('file was uploaded');
 		const file: File | null = e.target.files?.[0];
 		if (!file) {
 			return;
@@ -25,10 +20,6 @@ const UploadModal: React.FC = () => {
 				const imageUrl = readerEvent.target.result as string;
 				getImageDimensions(imageUrl).then(({ width, height }) => {
 					dispatch(setCanvasSize({ x: width, y: height }));
-					setLocalStorageCanvasSize(width, height);
-					const ctx = getCanvasContext();
-					ctx.canvas.width = width;
-					ctx.canvas.height = height;
 					drawImageOnCanvas(imageUrl);
 					setLocalStorageImage(imageUrl);
 				});
@@ -118,7 +109,7 @@ const RadioButton: React.FC<RadioButtonProps> = ({
 				id={value}
 				name={name}
 				value={value}
-				onClick={(e) => handleClick(e)}
+				onChange={(e) => handleClick(e)}
 				defaultChecked={defaultChecked}
 			/>
 			<label htmlFor={value}>{label}</label>

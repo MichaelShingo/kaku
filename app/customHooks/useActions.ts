@@ -1,6 +1,6 @@
 import { useAppSelector } from '@/redux/store';
 import { useDispatch } from 'react-redux';
-import { getCanvasContext } from '../utils/canvasContext';
+import { getCanvasContext, setLocalStorageImage } from '../utils/canvasContext';
 import { setIsAudioReady } from '@/redux/features/audioSlice';
 import {
 	appendCanvasHistory,
@@ -50,7 +50,7 @@ const useActions = () => {
 		const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 		const canvasData: string = canvas.toDataURL();
 		dispatch(appendCanvasHistory(canvasData));
-		localStorage.setItem('imageData', canvasData);
+		setLocalStorageImage(canvasData);
 		dispatch(setCurrentHistoryIndex(currentHistoryIndex + 1));
 	};
 

@@ -12,6 +12,8 @@ export const loadLocalStorageImage = () => {
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 	const savedImageData: string = localStorage.getItem('imageData');
 	if (savedImageData) {
+		console.log('loading local stroage image');
+
 		const img: HTMLImageElement = new Image();
 		img.onload = () => {
 			ctx.drawImage(img, 0, 0);
@@ -21,6 +23,7 @@ export const loadLocalStorageImage = () => {
 };
 
 export const setLocalStorageImage = (imageUrl: string) => {
+	console.log('setting local storage image');
 	localStorage.setItem('imageData', imageUrl);
 };
 

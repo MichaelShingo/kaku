@@ -47,6 +47,8 @@ const useActions = () => {
 	};
 
 	const addToHistory = () => {
+		console.log('add to history');
+		console.log(currentHistoryIndex);
 		const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 		const canvasData: string = canvas.toDataURL();
 		dispatch(appendCanvasHistory(canvasData));

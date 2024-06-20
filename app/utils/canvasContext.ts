@@ -5,7 +5,7 @@ export const getCanvasContext = (): CanvasRenderingContext2D => {
 	return canvas.getContext('2d') as CanvasRenderingContext2D;
 };
 
-export const loadLocalStorageImage = () => {
+export const loadLocalStorageImage = (): string => {
 	const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 	const ctx = getCanvasContext();
 	ctx.fillStyle = 'white';
@@ -20,6 +20,7 @@ export const loadLocalStorageImage = () => {
 		};
 		img.src = savedImageData;
 	}
+	return savedImageData;
 };
 
 export const setLocalStorageImage = (imageUrl: string) => {

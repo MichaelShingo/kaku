@@ -8,6 +8,7 @@ import {
 	Coordinate,
 	setIsCursorInCanvas,
 	setCanvasSize,
+	appendCanvasHistory,
 } from '@/redux/features/windowSlice';
 import { Shape } from '@/redux/features/toolSlice';
 import { setIsAudioReady, setSeconds } from '@/redux/features/audioSlice';
@@ -75,10 +76,10 @@ const Canvas: React.FC<CanvasProps> = ({ pageRef }) => {
 
 		setCanvasCTX(ctx);
 		if (ctx) {
-			loadLocalStorageImage();
+			const savedImageData = loadLocalStorageImage();
+			dispatch(appendCanvasHistory(savedImageData));
 		}
 		console.log('add to history initial load');
-		// addToHistory();
 	}, []);
 
 	useEffect(() => {
